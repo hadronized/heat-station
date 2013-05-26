@@ -1,7 +1,7 @@
 CXX           = clang++
-PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_MINIFMOD_SYNTH -m32
-CXXFLAGS      = -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DSKY_DEBUG $(PLATFORM)
-LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lminifmod -pthread
+PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_FMODEX_SYNTH
+CXXFLAGS      = -g -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DSKY_DEBUG $(PLATFORM)
+LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lfmodex
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
 EXEC          = $(RELEASE).bin
@@ -17,6 +17,9 @@ all: $(OBJ)
 	@echo "-- Linking $(RELEASE)"
 	@$(CXX) $(OBJ) -o $(EXEC_DIR_PATH)/$(EXEC) $(CXXFLAGS) $(LDFLAGS)
 	@echo "-- Done!"
+
+test: all
+	@cd $(EXEC_DIR_PATH) && ./$(EXEC) 800 600
 
 skyoralis:
 	@cd ../skyoralis/build && git pull origin master && make clean all
