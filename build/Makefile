@@ -1,7 +1,7 @@
 CXX           = clang++
-PLATFORM      = -DSKY_LINUX
+PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_MINIFMOD_SYNTH -m32
 CXXFLAGS      = -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DSKY_DEBUG $(PLATFORM)
-LDFLAGS       = -L../skyoralis/build/lib -lskyoralis -lGL -lX11 -lfmodex
+LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lminifmod -pthread
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
 EXEC          = $(RELEASE).bin
@@ -19,7 +19,7 @@ all: $(OBJ)
 	@echo "-- Done!"
 
 skyoralis:
-	@cd ../skyoralis/build && git pull origin master && make
+	@cd ../skyoralis/build && git pull origin master && make clean all
 
 release: all
 	@echo "-- Compressing release"
