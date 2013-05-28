@@ -1,6 +1,6 @@
 CXX           = clang++
 PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_FMODEX_SYNTH
-CXXFLAGS      = -g -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DSKY_DEBUG $(PLATFORM)
+CXXFLAGS      = -g -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
 LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lfmodex
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
@@ -9,6 +9,8 @@ PACKER        = $(RELEASE)
 COMPRESS_LVL  = 6
 OBJ           = \
 								main.o\
+								\
+								fsm.init.o\
 
 .PHONY: all, clean, mrproper
 
@@ -39,6 +41,11 @@ release: all
 main.o: ../src/main.cpp
 	@echo "-- Compiling ENTRYPOINT $@"
 	@$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+fsm.%.o: ../src/fsm/%.cpp ../include/fsm/%.hpp
+	@echo "-- Compiling FSM $@"
+	@$(CXX) -c $< -o $@ $(CXXFLAGS)
+
 
 %.o: ../src/%.cpp ../include/%.hpp
 	@echo "-- Compiling $@"

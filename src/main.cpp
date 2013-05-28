@@ -1,4 +1,6 @@
+#include <core/context.hpp>
 #include <lang/primtypes.hpp>
+#include <fsm/init.hpp>
 #include <misc/cli.hpp>
 #include <misc/log.hpp>
 #include <track/synthesizer.hpp>
@@ -6,7 +8,10 @@
 using namespace sky;
 using namespace std;
 using namespace misc;
-using namespace track;
+
+namespace {
+  char const TITLE[] = "evoke2013_64k";
+}
 
 int main(int argc, char **argv) {
   ushort width, height;
@@ -17,12 +22,15 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  /* allocate the synthesizer */
-  Synthesizer synth;
+  core::Context gl(width, height, full, TITLE);
+  track::Synthesizer synth;
+
   synth.play("CentralStation.xm");
+  log << info << "hello" << endl;
 
-  while (1) {};
-
+  for (auto time = 0.f; time <= synth.length() && gl.treat_events(); time = synth.cursor()) {
+    gl.swap_buffers();
+  }
 
   return 0;
 }
