@@ -24,11 +24,12 @@ int main(int argc, char **argv) {
 
   core::Context gl(width, height, full, TITLE);
   track::Synthesizer synth;
+  sync::PartsFSM synchronizer(init_sync(width, height));
 
   synth.play("CentralStation.xm");
-  log << info << "hello" << endl;
 
   for (auto time = 0.f; time <= synth.length() && gl.treat_events(); time = synth.cursor()) {
+    synchronizer.exec(time);
     gl.swap_buffers();
   }
 

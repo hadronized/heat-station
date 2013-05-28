@@ -4,21 +4,10 @@ d’explorateur de cellule ? Ouais non je vois mal comment on va pouvoir se ball
 Les progressions sont molles, on va endormir tout le monde ahah. Le mieux qui reste à faire est une retro, car si on se lance
 dans des effets de fous, la musique ne va pas suivre.
 
-===========
-De 0 à 20.5
-===========
+=========
+Cube Room
+=========
 
-Ici on une progression lente, avec les mêmes notes répétées plusieurs fois. Le même effet d’apparition / disparition qui nous
-oblige à faire appaître puis disparaître notre scène. On va avoir une pièce dont les parois seront faites de dalles, un peu
-comme les plaques de Portal. On mappera dessus une texture très simple : un effet vignette, qui donnera un effet d’AO gratuit,
-un effet cadrillage léger pour donner un aspect plus moderne à la texture, et du perlin noise avec si possible un léger bumb
-mapping dessus pour donner l’impression de grain. Avec ça on aura une texture d’enfer !
-La pièce va être recouverte de ces dalles qui doivent pouvoir se mouvoir plus loin dans l’intro, donc prévoir le code pour dès
-le début. Certaines d’entre elle ne doivent pas avoir la texture décrite ci-dessus, mais un mirroir qui reflète le reste de la
-pièce.
-
-
-
-
-
-Un escalier mirroir ? Ou alors une grotte de cristaux ?
+Ce premier screen va se dérouler dans une pièce plongée dans l’obscurité. La pièce est cubique, et les paroies sont formées de
+dalles. Certaines ont une texture grain Portal™, d’autres sont des mirroirs. En centre à l’horizontal passe un gros faisceau
+laser rouge bien épais. Le top du top serait d’avoir de l’eau avec réfraction.

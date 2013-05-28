@@ -10,6 +10,7 @@ COMPRESS_LVL  = 6
 OBJ           = \
 								main.o\
 								\
+								fsm.cube_room.o\
 								fsm.init.o\
 
 .PHONY: all, clean, mrproper
@@ -24,7 +25,7 @@ test: all
 	@cd $(EXEC_DIR_PATH) && ./$(EXEC) 800 600
 
 skyoralis:
-	@cd ../skyoralis/build && git pull origin master && make clean all
+	@cd ../skyoralis/build && git pull origin master && make
 
 release: all
 	@echo "-- Compressing release"
