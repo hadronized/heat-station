@@ -9,6 +9,16 @@ De 0 à 20.5
 ===========
 
 Ici on une progression lente, avec les mêmes notes répétées plusieurs fois. Le même effet d’apparition / disparition qui nous
-oblige à faire appaître puis disparaître notre scène. On pourrait déformer un objet. Ou alors on pourrait avoir un jeu de lumières.
-Vers 18.0, on peut faire rebondir rapidement plusieurs fois un glenz vector sous un spot de lumière. Ça pourrait en faire rire
-certains.
+oblige à faire appaître puis disparaître notre scène. On va avoir une pièce dont les parois seront faites de dalles, un peu
+comme les plaques de Portal. On mappera dessus une texture très simple : un effet vignette, qui donnera un effet d’AO gratuit,
+un effet cadrillage léger pour donner un aspect plus moderne à la texture, et du perlin noise avec si possible un léger bumb
+mapping dessus pour donner l’impression de grain. Avec ça on aura une texture d’enfer !
+La pièce va être recouverte de ces dalles qui doivent pouvoir se mouvoir plus loin dans l’intro, donc prévoir le code pour dès
+le début. Certaines d’entre elle ne doivent pas avoir la texture décrite ci-dessus, mais un mirroir qui reflète le reste de la
+pièce.
+
+
+
+
+
+Un escalier mirroir ? Ou alors une grotte de cristaux ?
