@@ -1,17 +1,69 @@
+#include <core/state.hpp>
 #include <fsm/cube_room.hpp>
+#include <math/common.hpp>
+#include <math/matrix.hpp>
 #include <misc/from_file.hpp>
 
 using namespace sky;
 
-CubeRoom::CubeRoom(ushort width, ushort height) :
-    _room("CubeRoom", misc::from_file("../../shaders/cuberoom-fs.glsl").c_str(), width, height) {
+namespace {
+  ushort const TESS_LASER_LEVEL = 1;
+  float const FOVY              = math::PI_4; /* 90 degrees */
+  float const ZNEAR             = 0.1f;
+  float const ZFAR              = 100.f;
+}
+
+CubeRoom::CubeRoom(ushort width, ushort height) {
+  _init_laser_program();
+  _init_laser_uniforms(width, height);
+  _laser.bind();
+  _laser.unbind();
 }
 
 CubeRoom::~CubeRoom() {
 }
 
-void CubeRoom::run(float time) const {
-  _room.start();
-  _room.apply(time);
-  _room.start();
+void CubeRoom::_init_laser_program() {
+  core::Shader vs(core::Shader::VERTEX);
+  core::Shader fs(core::Shader::FRAGMENT);
+
+  /* sources compilation */
+  vs.source(misc::from_file("../../src/fsm/laser-vs.glsl").c_str());
+  vs.compile("laser VS");
+  fs.source(misc::from_file("../../src/fsm/laser-fs.glsl").c_str());
+  fs.compile("laser FS");
+
+  /* program link */
+  _laserSP.attach(vs);
+  _laserSP.attach(fs);
+  _laserSP.link();
 }
+
+void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
+  auto rvnbIndex = _laserSP.map_uniform("rvnb");
+  auto projIndex = _laserSP.map_uniform("proj");
+
+  _laserSP.use();
+  rvnbIndex.push(1.f / TESS_LASER_LEVEL);
+  projIndex.push(math::Mat44::perspective(width / height, FOVY, ZNEAR, ZFAR));
+}
+
+void CubeRoom::_render_laser() const {
+  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+  
+  /* first render the lined laser */
+  _laserSP.use();
+  _laser.render(core::primitive::LINE_STRIP, 0, TESS_LASER_LEVEL+1);
+  _laserSP.unuse();
+
+  /* blur the lined laser */
+
+  /* add a moving effect on the blured area */
+
+  /* then render the extremity with billboards */
+}
+
+void CubeRoom::run(float time) const {
+  _render_laser();
+}
+

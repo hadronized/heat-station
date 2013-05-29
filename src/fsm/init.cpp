@@ -6,6 +6,6 @@ using namespace sync;
 
 PartState * init_sync(ushort width, ushort height) {
   auto cubeRoom = new CubeRoom(width, height);
-  return nullptr;
+  return cubeRoom;
 }
 
