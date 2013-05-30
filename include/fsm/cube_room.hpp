@@ -12,8 +12,9 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::VertexArray _laser;
   sky::core::Program _laserSP;
   void _init_laser_program(void);
+  sky::core::Program::Uniform _laserTimeIndex;
   void _init_laser_uniforms(sky::ushort width, sky::ushort height);
-  void _render_laser(void) const;
+  void _render_laser(float time) const;
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height);
