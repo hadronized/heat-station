@@ -84,11 +84,11 @@ void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
 void CubeRoom::_render_laser(float time) const {
   static core::FramebufferHandler fbh;
   static core::TextureHandler<1> texh;
-  static int offtexid = 0;
+  int offtexid = 0;
 
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
   
-  /* first render the lined laser in a frambuffer */
+  /* first, render the lined laser into a framebuffer */
   _laserSP.use();
   _laserTimeIndex.push(time);
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
@@ -96,20 +96,23 @@ void CubeRoom::_render_laser(float time) const {
   fbh.unbind();
   _laserSP.unuse();
 
-  /* blur the lined laser */
+  /* then, blur the lined laser */
   for (int i = 0; i < BLUR_PASSES; ++i) {
-
-    texh.bind(core::Texture::T_2D, _laserBlurOfftex[1-i]);
+    texh.bind(core::Texture::T_2D, _laserBlurOfftex[i & 1]);
+    fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[(i+1) & 1]);
     _laserHBlur.start();
     _laserHBlur.apply(0.);
     _laserHBlur.end();
+    fbh.unbind();
     texh.unbind();
   }
 
-
-  /* add a moving effect on the blured area */
+  /* add a moving effect on the blurred area
+   * hint: the final blurred framebuffer id is BLUR_PASSES & 1 */
 
   /* then render the extremity with billboards */
+
+  /* combine blurred lined laser and billboards */
 }
 
 void CubeRoom::run(float time) const {
