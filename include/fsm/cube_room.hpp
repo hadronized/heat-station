@@ -31,6 +31,13 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Texture _laserBlurOfftex[2];
   void _init_laser_blur(sky::ushort width, sky::ushort height);
 
+  /* laser move */
+  sky::tech::TemporalPostProcess _laserMove;
+
+  /* laser billboards */
+  sky::core::VertexArray _laserBillboard;
+  sky::core::Program _laserBillboardSP;
+
   void _render_laser(float time) const;
 
 public :

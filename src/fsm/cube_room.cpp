@@ -21,7 +21,8 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
   , _fbCopier(width, height)
     /* laser blur */
   , _laserHBlur("laser hblur", misc::from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
-  , _laserVBlur("laser vblur", misc::from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height) {
+  , _laserVBlur("laser vblur", misc::from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
+  , _laserMove("laser move", misc::from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height) {
   _init_laser_program(width, height);
   _laser.bind();
   _laser.unbind();
@@ -49,6 +50,18 @@ void CubeRoom::_init_laser_program(ushort width, ushort height) {
   _init_laser_blur(width, height); 
 }
 
+void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
+  auto rvnbIndex  = _laserSP.map_uniform("rvnb");
+  auto projIndex  = _laserSP.map_uniform("proj");
+  _laserTimeIndex = _laserSP.map_uniform("t");
+
+  _laserSP.use();
+  rvnbIndex.push(1.f / TESS_LASER_LEVEL);
+  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
+
+  _laserSP.unuse();
+}
+
 void CubeRoom::_init_laser_blur(ushort width, ushort height) {
   core::FramebufferHandler fbh;
   core::RenderbufferHandler rbh;
@@ -71,18 +84,6 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
     fbh.attach_renderbuffer(_laserBlurRB, core::Framebuffer::DEPTH_ATTACHMENT);
     fbh.attach_2D_texture(_laserBlurOfftex[i], core::Framebuffer::COLOR_ATTACHMENT);
   }
-}
-
-void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
-  auto rvnbIndex  = _laserSP.map_uniform("rvnb");
-  auto projIndex  = _laserSP.map_uniform("proj");
-  _laserTimeIndex = _laserSP.map_uniform("t");
-
-  _laserSP.use();
-  rvnbIndex.push(1.f / TESS_LASER_LEVEL);
-  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
-
-  _laserSP.unuse();
 }
 
 void CubeRoom::_render_laser(float time) const {
@@ -122,13 +123,17 @@ void CubeRoom::_render_laser(float time) const {
 
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is 0 */
-
-  /* combined the blurred lined laser and the moving effect */
-  _fbCopier.copy(_laserBlurOfftex[1]);
+  fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[1]);
+  texh.bind(core::Texture::T_2D, _laserBlurOfftex[0]);
+  _laserMove.start();
+  _laserMove.apply(time);
+  _laserMove.end();
+  fbh.unbind();
 
   /* then render the extremity with billboards */
-
+  
   /* combine the blurred lined moving laser and billboards */
+  _fbCopier.copy(_laserBlurOfftex[1]);
 }
 
 void CubeRoom::run(float time) const {
