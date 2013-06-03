@@ -86,6 +86,25 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
   }
 }
 
+void CubeRoom::_init_room() {
+  _room.bind();
+  _room.unbind(); /* attribute-less render */
+}
+
+void CubeRoom::_init_room_program(ushort width, ushort height) {
+  core::Shader vs(core::Shader::VERTEX);
+  core::Shader fs(core::Shader::FRAGMENT);
+
+  vs.source(misc::from_file("../../src/fsm/room-vs.glsl").c_str());
+  vs.compile("room vertex shader");
+  fs.source(misc::from_file("../../src/fsm/room-fs.glsl").c_str());
+  fs.compile("room fragment shader");
+
+  _roomSP.attach(vs);
+  _roomSP.attach(fs);
+  _roomSP.link();
+}
+
 void CubeRoom::_render_laser(float time) const {
   static core::FramebufferHandler fbh;
   static core::TextureHandler<1> texh;

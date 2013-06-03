@@ -38,6 +38,13 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::VertexArray _laserBillboard;
   sky::core::Program _laserBillboardSP;
 
+  /* room */
+  sky::core::VertexArray _room;
+  sky::core::Program _roomSP;
+  void _init_room(void);
+  void _init_room_program(sky::ushort width, sky::ushort height);
+  void _init_room_uniforms(sky::ushort width, sky::ushort height);
+
   void _render_laser(float time) const;
 
 public :
