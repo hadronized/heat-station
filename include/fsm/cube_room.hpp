@@ -8,11 +8,13 @@
 #include <core/vertex_array.hpp>
 #include <lang/primtypes.hpp>
 #include <sync/parts_fsm.hpp>
+#include <tech/framebuffer_copy.hpp>
 #include <tech/post_process.hpp>
 
 class CubeRoom : public sky::sync::FinalPartState {
   /* common */
   sky::ushort _width, _height;
+  sky::tech::DefaultFramebufferCopy _fbCopier;
 
   /* laser */
   sky::core::VertexArray _laser;

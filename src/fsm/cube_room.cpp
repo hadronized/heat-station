@@ -18,6 +18,7 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
     /* common */
     _width(width)
   , _height(height)
+  , _fbCopier(width, height)
     /* laser blur */
   , _laserHBlur("laser hblur", misc::from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", misc::from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height) {
@@ -114,10 +115,7 @@ void CubeRoom::_render_laser(float time) const {
    * hint: the final blurred framebuffer id is BLUR_PASSES & 1 */
 
   /* combined the blurred lined laser and the moving effect */
-  fbh.bind(core::Framebuffer::READ, _laserBlurFB[BLUR_PASSES & 1]);
-  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
-  fbh.blit(0, 0, _width, _height, core::state::COLOR_BUFFER, core::Texture::PV_LINEAR);
-  fbh.unbind();
+  _fbCopier.copy(_laserBlurOfftex[BLUR_PASSES & 1]);
 
   /* then render the extremity with billboards */
 
