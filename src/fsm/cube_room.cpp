@@ -11,7 +11,7 @@ namespace {
   float  const ZNEAR            = 0.001f;
   float  const ZFAR             = 100.f;
   ushort const TESS_LASER_LEVEL = 18;
-  ushort const BLUR_PASSES      = 1;
+  ushort const BLUR_PASSES      = 5;
 }
 
 CubeRoom::CubeRoom(ushort width, ushort height) :
@@ -62,8 +62,8 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
     texh.bind(core::Texture::T_2D, _laserBlurOfftex[i]);
     texh.parameter(core::Texture::P_WRAP_S, core::Texture::PV_CLAMP_TO_BORDER);
     texh.parameter(core::Texture::P_WRAP_T, core::Texture::PV_CLAMP_TO_BORDER);
-    texh.parameter(core::Texture::P_MIN_FILTER, core::Texture::PV_NEAREST);
-    texh.parameter(core::Texture::P_MAG_FILTER, core::Texture::PV_NEAREST);
+    texh.parameter(core::Texture::P_MIN_FILTER, core::Texture::PV_LINEAR);
+    texh.parameter(core::Texture::P_MAG_FILTER, core::Texture::PV_LINEAR);
     texh.image_2D(width, height, 0, core::Texture::F_RGB, core::Texture::IF_RGB, core::GLT_FLOAT, 0, nullptr);
     texh.unbind();
 
@@ -101,21 +101,30 @@ void CubeRoom::_render_laser(float time) const {
 
   /* then, blur the lined laser */
   for (int i = 0; i < BLUR_PASSES; ++i) {
-    texh.bind(core::Texture::T_2D, _laserBlurOfftex[i & 1]);
-    fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[(i+1) & 1]);
+    /* first hblur */
+    texh.bind(core::Texture::T_2D, _laserBlurOfftex[0]);
+    fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[1]);
     core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
     _laserHBlur.start();
     _laserHBlur.apply(0.);
     _laserHBlur.end();
-    fbh.unbind();
-    texh.unbind();
+    /* then vblur */
+    texh.bind(core::Texture::T_2D, _laserBlurOfftex[1]);
+    fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
+    core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+    _laserVBlur.start();
+    _laserVBlur.apply(0.);
+    _laserVBlur.end();
   }
+  fbh.unbind();
+  texh.unbind();
+
 
   /* add a moving effect on the blurred area
-   * hint: the final blurred framebuffer id is BLUR_PASSES & 1 */
+   * hint: the final blurred framebuffer id is 0 */
 
   /* combined the blurred lined laser and the moving effect */
-  _fbCopier.copy(_laserBlurOfftex[BLUR_PASSES & 1]);
+  _fbCopier.copy(_laserBlurOfftex[1]);
 
   /* then render the extremity with billboards */
 
