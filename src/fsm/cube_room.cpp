@@ -15,8 +15,11 @@ namespace {
 }
 
 CubeRoom::CubeRoom(ushort width, ushort height) :
+    /* common */
+    _width(width)
+  , _height(height)
     /* laser blur */
-    _laserHBlur("laser hblur", misc::from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
+  , _laserHBlur("laser hblur", misc::from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", misc::from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height) {
   _init_laser_program(width, height);
   _laser.bind();
@@ -85,13 +88,12 @@ void CubeRoom::_render_laser(float time) const {
   static core::FramebufferHandler fbh;
   static core::TextureHandler<1> texh;
   int offtexid = 0;
-
-  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
-  
+ 
   /* first, render the lined laser into a framebuffer */
   _laserSP.use();
   _laserTimeIndex.push(time);
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
+  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
   _laser.render(core::primitive::LINE_STRIP, 0, TESS_LASER_LEVEL+1);
   fbh.unbind();
   _laserSP.unuse();
@@ -100,6 +102,7 @@ void CubeRoom::_render_laser(float time) const {
   for (int i = 0; i < BLUR_PASSES; ++i) {
     texh.bind(core::Texture::T_2D, _laserBlurOfftex[i & 1]);
     fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[(i+1) & 1]);
+    core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
     _laserHBlur.start();
     _laserHBlur.apply(0.);
     _laserHBlur.end();
@@ -110,9 +113,15 @@ void CubeRoom::_render_laser(float time) const {
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is BLUR_PASSES & 1 */
 
+  /* combined the blurred lined laser and the moving effect */
+  fbh.bind(core::Framebuffer::READ, _laserBlurFB[BLUR_PASSES & 1]);
+  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+  fbh.blit(0, 0, _width, _height, core::state::COLOR_BUFFER, core::Texture::PV_LINEAR);
+  fbh.unbind();
+
   /* then render the extremity with billboards */
 
-  /* combine blurred lined laser and billboards */
+  /* combine the blurred lined moving laser and billboards */
 }
 
 void CubeRoom::run(float time) const {

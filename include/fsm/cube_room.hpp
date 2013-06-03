@@ -11,6 +11,9 @@
 #include <tech/post_process.hpp>
 
 class CubeRoom : public sky::sync::FinalPartState {
+  /* common */
+  sky::ushort _width, _height;
+
   /* laser */
   sky::core::VertexArray _laser;
   sky::core::Program _laserSP;
