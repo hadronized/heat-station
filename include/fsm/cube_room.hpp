@@ -39,21 +39,23 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::VertexArray _laserBillboard;
   sky::core::Program _laserBillboardSP;
 
+  void _render_laser(float time) const;
+
   /* room */
   sky::core::VertexArray _room;
-  sky::core::VertexArray _roomIBO;
+  sky::core::Buffer _roomIBO;
   sky::core::Program _roomSP;
   void _init_room(void);
   void _init_room_program(sky::ushort width, sky::ushort height);
   void _init_room_uniforms(sky::ushort width, sky::ushort height);
 
-  void _render_laser(float time) const;
+  void _render_room(float time) const;
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height);
   ~CubeRoom(void);
 
-  void run(float time) const;
+  void run(float time) const override;
 };
 
 #endif /* guard */

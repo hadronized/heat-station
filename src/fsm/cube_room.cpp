@@ -94,7 +94,7 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
 void CubeRoom::_init_room() {
   core::BufferHandler bufh;
 
-  uint ids[48] = {
+  uint const ids[48] = {
     /* front face */
       0, 1, 2
     , 0, 2, 3
@@ -108,16 +108,21 @@ void CubeRoom::_init_room() {
     , 2, 3, 7
     , 2, 7, 6
     /* left face */
+    , 1, 2, 5
+    , 2, 5, 6
+    /* right face */
+    , 0, 3, 4
+    , 3, 4, 7
+  };
 
   /* IBO */
-  bufh.bind(core::Buffer::ELEMENT_ARRAY);
-  bufh.data(48, ids, core::Buffer::STATIC_DRAW);
+  bufh.bind(core::Buffer::ELEMENT_ARRAY, _roomIBO);
+  bufh.data(sizeof(uint)*48, core::Buffer::STATIC_DRAW, ids);
   bufh.unbind();
-
 
   /* VA */
   _room.bind();
-  bufh.bind(core::Buffer::ELEMENT_ARRAY);
+  bufh.bind(core::Buffer::ELEMENT_ARRAY, _roomIBO);
   _room.unbind(); /* attribute-less render */
   bufh.unbind();
 }
@@ -194,6 +199,9 @@ void CubeRoom::_render_laser(float time) const {
   
   /* combine the blurred lined moving laser and billboards */
   _fbCopier.copy(_laserBlurOfftex[1]);
+}
+
+void CubeRoom::_render_room(float time) const {
 }
 
 void CubeRoom::run(float time) const {
