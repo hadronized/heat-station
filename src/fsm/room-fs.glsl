@@ -9,5 +9,5 @@ out vec4 frag;
 
 void main() {
   /* first, simple diffuse phong with origined light */
-  frag = 
-
+  frag = vec4(1.); /* TODO */
+}

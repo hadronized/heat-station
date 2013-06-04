@@ -1,6 +1,7 @@
 #ifndef __FSM_CUBE_ROOM_HPP
 #define __FSM_CUBE_ROOM_HPP
 
+#include <core/buffer.hpp>
 #include <core/framebuffer.hpp>
 #include <core/renderbuffer.hpp>
 #include <core/shader.hpp>
@@ -40,6 +41,7 @@ class CubeRoom : public sky::sync::FinalPartState {
 
   /* room */
   sky::core::VertexArray _room;
+  sky::core::VertexArray _roomIBO;
   sky::core::Program _roomSP;
   void _init_room(void);
   void _init_room_program(sky::ushort width, sky::ushort height);
