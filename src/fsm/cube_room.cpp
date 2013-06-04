@@ -103,6 +103,11 @@ void CubeRoom::_init_room_program(ushort width, ushort height) {
   _roomSP.attach(vs);
   _roomSP.attach(fs);
   _roomSP.link();
+
+  _init_room_uniforms(width, height);
+}
+
+void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
 }
 
 void CubeRoom::_render_laser(float time) const {
