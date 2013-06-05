@@ -10,4 +10,23 @@ Cube Room
 
 Ce premier screen va se dérouler dans une pièce plongée dans l’obscurité. La pièce est cubique, et les paroies sont formées de
 dalles. Certaines ont une texture grain Portal™, d’autres sont des mirroirs. En centre à l’horizontal passe un gros faisceau
-laser rouge bien épais. Le top du top serait d’avoir de l’eau avec réfraction.
+laser rouge bien épais. Le top du top serait d’avoir de l’eau avec réfraction sur le sol de la pièce. Les dalles doivent se
+mettre à bouger vers l’intérieur de la pièce, en tournant sur elles-mêmes.
+
+On va utiliser un objet nommé slab. C’est un cube dont on peut définir l’épaisseur. On va donc la mettre à 1 pour la salle,
+quelque chose comme 0.1 (10%) pour les dalles. Cela nous permet d’en mettre quelque chose comme 10 collés les uns aux autres
+sur un pan de mur, donc 9 si on met de l’espace entre chaque. C’est suffisant. On va balancer par uniform l’épaisseur, et on
+positionnera chaque slab avec une fonction random en fonction du temps par exemple.
+
+J’ai trouvé quoi faire pour l’effet laser qui se déplace : du bête grain ! Pas besoin de trop se casser le cul : on passe par
+notre fonction rand() maison à laquelle on applique deux trois opérations arithmétique pour ne pas avoir un trop gros bruit (un
+bon filtre passe bas), et ça devrait le faire pour le bruit du laser !
+Par contre, on va sûrement changer notre manière de le rendre. Pour l’instant il s’agit d’une ligne tessellée puis blurrée.
+L’effet est sympa mais je pense qu’on va se heurter à deux problèmes :
+  · l’effet est fonction de la position de la caméra et des dimensions de la fenêtre ;
+  · au moment où la ligne va sortir de l’écran, on va perdre tout le rendu, se qui risque de faire un effet chelou.
+
+Voila donc pourquoi on va modifier un peu cette histoire. Après tessellation dans le vertex shader, on va ajouter un geometry
+shader qui va transformer chaque ligne en croisillon. On va ensuite simplement plaquer une texture sinusoïdale sur les quad pour
+avoir un laser déjà bluré un peu comme le Spartan Laser dans Halo. On va laisser le blur mais le diminuer (sinon on va recouvrir
+tout l’écran). Après le blur, on ajoute les billboards d’extrémité, puis on ajoute le grain, et c’est gagné !

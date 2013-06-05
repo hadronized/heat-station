@@ -42,12 +42,18 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _render_laser(float time) const;
 
   /* room */
-  sky::core::VertexArray _room;
-  sky::core::Buffer _roomIBO;
-  sky::core::Program _roomSP;
+  sky::core::VertexArray _slab;
+  sky::core::Buffer _slabIBO;
+  sky::core::Program _slabSP;
+  sky::core::Program::Uniform _slabSizeIndex;
+  sky::core::Program::Uniform _slabThicknessIndex;
   void _init_room(void);
   void _init_room_program(sky::ushort width, sky::ushort height);
   void _init_room_uniforms(sky::ushort width, sky::ushort height);
+  
+  /* slabs */
+  /* most of the material comes from the room part */
+  void _render_slabs(float time) const;
 
   void _render_room(float time) const;
 

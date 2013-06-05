@@ -12,8 +12,12 @@ namespace {
   float  const ZFAR             = 100.f;
   ushort const TESS_LASER_LEVEL = 18;
   ushort const BLUR_PASSES      = 5;
+  ushort const SLABS_NB         = 20;
 }
 
+/* ============
+ * [ CubeRoom ]
+ * ============ */
 CubeRoom::CubeRoom(ushort width, ushort height) :
     /* common */
     _width(width)
@@ -36,6 +40,9 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
 CubeRoom::~CubeRoom() {
 }
 
+/* =========
+ * [ Laser ]
+ * ========= */
 void CubeRoom::_init_laser_program(ushort width, ushort height) {
   core::Shader vs(core::Shader::VERTEX);
   core::Shader fs(core::Shader::FRAGMENT);
@@ -91,66 +98,6 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
   }
 }
 
-void CubeRoom::_init_room() {
-  core::BufferHandler bufh;
-
-  uint const ids[48] = {
-    /* front face */
-      0, 1, 2
-    , 0, 2, 3
-    /* back face */
-    , 4, 5, 7
-    , 5, 7, 6
-    /* up face */
-    , 0, 1, 4
-    , 1, 4, 5
-    /* bottom face */
-    , 2, 3, 7
-    , 2, 7, 6
-    /* left face */
-    , 1, 2, 5
-    , 2, 5, 6
-    /* right face */
-    , 0, 3, 4
-    , 3, 4, 7
-  };
-
-  /* IBO */
-  bufh.bind(core::Buffer::ELEMENT_ARRAY, _roomIBO);
-  bufh.data(sizeof(uint)*48, core::Buffer::STATIC_DRAW, ids);
-  bufh.unbind();
-
-  /* VA */
-  _room.bind();
-  bufh.bind(core::Buffer::ELEMENT_ARRAY, _roomIBO);
-  _room.unbind(); /* attribute-less render */
-  bufh.unbind();
-}
-
-void CubeRoom::_init_room_program(ushort width, ushort height) {
-  core::Shader vs(core::Shader::VERTEX);
-  core::Shader fs(core::Shader::FRAGMENT);
-
-  vs.source(misc::from_file("../../src/fsm/room-vs.glsl").c_str());
-  vs.compile("room vertex shader");
-  fs.source(misc::from_file("../../src/fsm/room-fs.glsl").c_str());
-  fs.compile("room fragment shader");
-
-  _roomSP.attach(vs);
-  _roomSP.attach(fs);
-  _roomSP.link();
-
-  _init_room_uniforms(width, height);
-}
-
-void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
-  auto projIndex = _roomSP.map_uniform("proj");
-
-  _roomSP.use();
-  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
-  _roomSP.unuse();
-}
-
 void CubeRoom::_render_laser(float time) const {
   static core::FramebufferHandler fbh;
   static core::TextureHandler<1> texh;
@@ -185,7 +132,6 @@ void CubeRoom::_render_laser(float time) const {
   fbh.unbind();
   texh.unbind();
 
-
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is 0 */
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[1]);
@@ -201,10 +147,117 @@ void CubeRoom::_render_laser(float time) const {
   _fbCopier.copy(_laserBlurOfftex[1]);
 }
 
-void CubeRoom::_render_room(float time) const {
+/* ========
+ * [ Room ]
+ * ======== */
+void CubeRoom::_init_room() {
+  core::BufferHandler bufh;
+
+  uint const ids[] = {
+    /* front face */
+      0, 1, 2
+    , 0, 2, 3
+    /* back face */
+    , 4, 5, 7
+    , 5, 7, 6
+    /* up face */
+    , 0, 1, 4
+    , 1, 4, 5
+    /* bottom face */
+    , 2, 3, 7
+    , 2, 7, 6
+    /* left face */
+    , 1, 2, 5
+    , 2, 5, 6
+    /* right face */
+    , 0, 3, 4
+    , 3, 4, 7
+  };
+
+  /* IBO */
+  bufh.bind(core::Buffer::ELEMENT_ARRAY, _slabIBO);
+  bufh.data(sizeof(uint)*36, core::Buffer::STATIC_DRAW, ids);
+  bufh.unbind();
+
+  /* VA */
+  _slab.bind();
+  bufh.bind(core::Buffer::ELEMENT_ARRAY, _slabIBO);
+  _slab.unbind(); /* attribute-less render */
+  bufh.unbind();
 }
 
+void CubeRoom::_init_room_program(ushort width, ushort height) {
+  core::Shader vs(core::Shader::VERTEX);
+  core::Shader fs(core::Shader::FRAGMENT);
+
+  vs.source(misc::from_file("../../src/fsm/room-vs.glsl").c_str());
+  vs.compile("room vertex shader");
+  fs.source(misc::from_file("../../src/fsm/room-fs.glsl").c_str());
+  fs.compile("room fragment shader");
+
+  _slabSP.attach(vs);
+  _slabSP.attach(fs);
+  _slabSP.link();
+
+  _init_room_uniforms(width, height);
+}
+
+void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
+  auto projIndex      = _slabSP.map_uniform("proj");
+  _slabSizeIndex      = _slabSP.map_uniform("size");
+  _slabThicknessIndex = _slabSP.map_uniform("thickness");
+
+  _slabSP.use();
+  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
+  _slabSP.unuse();
+}
+
+void CubeRoom::_render_room(float time) const {
+  core::state::enable(core::state::DEPTH_TEST);
+  _slabSP.use();
+  
+  /* push size and thickness */
+  _slabSizeIndex.push(1.f);
+  _slabThicknessIndex.push(1.f);
+  auto timeIndex = _slabSP.map_uniform("t");
+  timeIndex.push(time);
+  
+  /* render a single slab */
+  _slab.bind();
+  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 150);
+  _slab.unbind();
+  
+  _slabSP.unuse();
+}
+
+/* =========
+ * [ Slabs ]
+ * ========= */
+void CubeRoom::_render_slabs(float time) const {
+  _slabSP.use();
+  
+  /* push size and thickness */
+  _slabSizeIndex.push(0.8f);
+  _slabThicknessIndex.push(0.1f);
+  
+  /* render slabs */
+  _slab.bind();
+  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, SLABS_NB);
+  _slab.unbind();
+  _slabSP.unuse();
+}
+
+/* ============
+ * [ CubeRoom ]
+ * ============ */
 void CubeRoom::run(float time) const {
-  _render_laser(time);
+  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+  static core::FramebufferHandler fbh;
+
+  fbh.unbind();
+
+  _render_room(time);
+  /* TODO: render slabs */
+  //_render_laser(time);
 }
 
