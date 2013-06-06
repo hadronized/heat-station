@@ -12,7 +12,6 @@ namespace {
   float  const ZFAR             = 100.f;
   ushort const TESS_LASER_LEVEL = 18;
   ushort const BLUR_PASSES      = 5;
-  ushort const SLABS_NB         = 20;
 }
 
 /* ============
@@ -31,7 +30,6 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
   _init_laser_program(width, height);
   _laser.bind();
   _laser.unbind();
-
   /* room */
   _init_room();
   _init_room_program(width, height);
@@ -63,12 +61,12 @@ void CubeRoom::_init_laser_program(ushort width, ushort height) {
 }
 
 void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
-  auto rvnbIndex  = _laserSP.map_uniform("rvnb");
+  auto vnbIndex  = _laserSP.map_uniform("vnb");
   auto projIndex  = _laserSP.map_uniform("proj");
   _laserTimeIndex = _laserSP.map_uniform("t");
 
   _laserSP.use();
-  rvnbIndex.push(1.f / TESS_LASER_LEVEL);
+  vnbIndex.push(1.f * TESS_LASER_LEVEL, 1.f / TESS_LASER_LEVEL);
   projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
 
   _laserSP.unuse();
@@ -213,7 +211,6 @@ void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
 }
 
 void CubeRoom::_render_room(float time) const {
-  core::state::enable(core::state::DEPTH_TEST);
   _slabSP.use();
   
   /* push size and thickness */
@@ -222,7 +219,7 @@ void CubeRoom::_render_room(float time) const {
   auto timeIndex = _slabSP.map_uniform("t");
   timeIndex.push(time);
   
-  /* render a single slab */
+  /* render walls */
   _slab.bind();
   _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 150);
   _slab.unbind();
@@ -230,34 +227,18 @@ void CubeRoom::_render_room(float time) const {
   _slabSP.unuse();
 }
 
-/* =========
- * [ Slabs ]
- * ========= */
-void CubeRoom::_render_slabs(float time) const {
-  _slabSP.use();
-  
-  /* push size and thickness */
-  _slabSizeIndex.push(0.8f);
-  _slabThicknessIndex.push(0.1f);
-  
-  /* render slabs */
-  _slab.bind();
-  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, SLABS_NB);
-  _slab.unbind();
-  _slabSP.unuse();
-}
-
 /* ============
  * [ CubeRoom ]
  * ============ */
 void CubeRoom::run(float time) const {
+  core::state::enable(core::state::DEPTH_TEST);
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
   static core::FramebufferHandler fbh;
 
-  fbh.unbind();
+  fbh.unbind(); /* back to the default framebuffer */
 
-  _render_room(time);
-  /* TODO: render slabs */
-  //_render_laser(time);
+  //_render_room(time);
+//  core::state::clear(core::state::DEPTH_BUFFER);
+  _render_laser(time);
 }
 

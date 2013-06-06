@@ -3,7 +3,6 @@
 uniform mat4 proj;
 uniform float size;      /* size of the slab */
 uniform float thickness; /* thickness of the slab: 0. = 0., 1. = size */
-uniform float t;
 
 out vec3 vco;      /* space coordinates as vertex shader output */
 out vec3 vno; /* normal as vertex shader output */
@@ -46,9 +45,5 @@ void main() {
   }
 
   vco -= foo * 0.5;
-  //vco.x += cos(t)*10.;
-  //vco.y += sin(t)*10.;
-  //vco.z -= 8.;
-  /* TODO: move vco according to gl_InstanceID */
   gl_Position = proj * vec4(vco, 1.);
 }
