@@ -10,7 +10,7 @@ out vec4 frag;
 
 void main() {
   vec3 eye  = vec3(0., 0., 0.); /* camera position */
-  vec3 lpos = vec3(cos(t)*2., sin(t)*2., -3.0); /* light pos */
+  vec3 lpos = vec3(cos(t)*2., sin(t)*2., 0.); /* light pos */
   vec3 lvco = lpos - vco;
   vec3 ldir = normalize(lvco); /* light ray */
 
