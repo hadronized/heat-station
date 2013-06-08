@@ -2,12 +2,13 @@
 #include <fsm/cube_room.hpp>
 #include <math/common.hpp>
 #include <math/matrix.hpp>
+#include <math/quaternion.hpp>
 #include <misc/from_file.hpp>
 
 using namespace sky;
 
 namespace {
-  float  const FOVY             = math::PI_4; /* 90 degrees */
+  float  const FOVY             = math::PI*70.f/180.f; /* 90 degrees */
   float  const ZNEAR            = 0.001f;
   float  const ZFAR             = 100.f;
   ushort const TESS_LASER_LEVEL = 18;
@@ -202,17 +203,25 @@ void CubeRoom::_init_room_program(ushort width, ushort height) {
 
 void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
   auto projIndex      = _slabSP.map_uniform("proj");
+  _slabViewIndex      = _slabSP.map_uniform("view");
   _slabSizeIndex      = _slabSP.map_uniform("size");
   _slabThicknessIndex = _slabSP.map_uniform("thickness");
 
   _slabSP.use();
   projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
+  math::Mat44 view;
+  view.identity();
   _slabSP.unuse();
 }
 
 void CubeRoom::_render_room(float time) const {
   _slabSP.use();
   
+  /* move camera around */
+  math::Quat view(math::Axis3(1.f, 0.f, 0.f), time*0.5f);
+  _slabViewIndex.push(view.to_matrix());
+  //_slabViewIndex.push(math::Mat44::trslt({0., 0., sin(time)}));
+
   /* push size and thickness */
   _slabSizeIndex.push(1.f);
   _slabThicknessIndex.push(1.f);
@@ -237,8 +246,8 @@ void CubeRoom::run(float time) const {
 
   fbh.unbind(); /* back to the default framebuffer */
 
-  //_render_room(time);
+  _render_room(time);
 //  core::state::clear(core::state::DEPTH_BUFFER);
-  _render_laser(time);
+ // _render_laser(time);
 }
 

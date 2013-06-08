@@ -1,6 +1,7 @@
 #version 330 core
 
 uniform mat4 proj;
+uniform mat4 view;
 uniform float size;      /* size of the slab */
 uniform float thickness; /* thickness of the slab: 0. = 0., 1. = size */
 
@@ -43,7 +44,7 @@ void main() {
   } else {
     vco += vec3(mod(gl_InstanceID-125, 5)*offset, foo, floor((gl_InstanceID-125)/5)*offset);
   }
-
   vco -= foo * 0.5;
-  gl_Position = proj * vec4(vco, 1.);
+
+  gl_Position = proj * view * vec4(vco, 1.);
 }

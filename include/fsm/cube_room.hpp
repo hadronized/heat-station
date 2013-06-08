@@ -45,6 +45,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::VertexArray _slab;
   sky::core::Buffer _slabIBO;
   sky::core::Program _slabSP;
+  sky::core::Program::Uniform _slabViewIndex;
   sky::core::Program::Uniform _slabSizeIndex;
   sky::core::Program::Uniform _slabThicknessIndex;
   void _init_room(void);

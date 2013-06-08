@@ -9,7 +9,7 @@ const float PI = 3.141592;
 
 void main() {
   /* laser */
-  vec3 p =vec3(0., 0., -gl_VertexID*vnb.y*1.);
+  vec3 p = vec3(0., 0., -gl_VertexID*vnb.y*1.);
   p.z += vnb.x * .5;
 
   /* displacement */
