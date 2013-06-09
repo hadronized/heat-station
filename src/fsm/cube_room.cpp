@@ -12,7 +12,8 @@ namespace {
   float  const ZNEAR            = 0.001f;
   float  const ZFAR             = 100.f;
   ushort const TESS_LASER_LEVEL = 18;
-  ushort const BLUR_PASSES      = 5;
+  ushort const BLUR_PASSES      = 0;
+  float  const LASER_HHEIGHT    = 0.25;
 }
 
 /* ============
@@ -44,16 +45,20 @@ CubeRoom::~CubeRoom() {
  * ========= */
 void CubeRoom::_init_laser_program(ushort width, ushort height) {
   core::Shader vs(core::Shader::VERTEX);
+  core::Shader gs(core::Shader::GEOMETRY);
   core::Shader fs(core::Shader::FRAGMENT);
 
   /* sources compilation */
   vs.source(misc::from_file("../../src/fsm/laser-vs.glsl").c_str());
   vs.compile("laser VS");
+  gs.source(misc::from_file("../../src/fsm/laser-gs.glsl").c_str());
+  gs.compile("laser GS");
   fs.source(misc::from_file("../../src/fsm/laser-fs.glsl").c_str());
   fs.compile("laser FS");
 
   /* program link */
   _laserSP.attach(vs);
+  _laserSP.attach(gs);
   _laserSP.attach(fs);
   _laserSP.link();
 
@@ -62,13 +67,17 @@ void CubeRoom::_init_laser_program(ushort width, ushort height) {
 }
 
 void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
-  auto vnbIndex  = _laserSP.map_uniform("vnb");
-  auto projIndex  = _laserSP.map_uniform("proj");
-  _laserTimeIndex = _laserSP.map_uniform("t");
+  auto vnbIndex     = _laserSP.map_uniform("vnb");
+  auto projIndex    = _laserSP.map_uniform("proj");
+  auto hheightIndex = _laserSP.map_uniform("hheight");
+  _laserTimeIndex   = _laserSP.map_uniform("t");
+  //_laserViewIndex = _laserSP.map_uniform("view");
 
   _laserSP.use();
+
   vnbIndex.push(1.f * TESS_LASER_LEVEL, 1.f / TESS_LASER_LEVEL);
   projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
+  hheightIndex.push(LASER_HHEIGHT);
 
   _laserSP.unuse();
 }
@@ -104,6 +113,10 @@ void CubeRoom::_render_laser(float time) const {
  
   /* first, render the lined laser into a framebuffer */
   _laserSP.use();
+
+  math::Quat view(math::Axis3(0.f, 1.f, 0.f), sinf(time*0.5f));
+  //_laserViewIndex.push(view.to_matrix());
+
   _laserTimeIndex.push(time);
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
@@ -133,17 +146,19 @@ void CubeRoom::_render_laser(float time) const {
 
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is 0 */
+#if 0
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[1]);
   texh.bind(core::Texture::T_2D, _laserBlurOfftex[0]);
   _laserMove.start();
   _laserMove.apply(time);
   _laserMove.end();
   fbh.unbind();
+#endif
 
   /* then render the extremity with billboards */
   
   /* combine the blurred lined moving laser and billboards */
-  _fbCopier.copy(_laserBlurOfftex[1]);
+  _fbCopier.copy(_laserBlurOfftex[0]);
 }
 
 /* ========
@@ -220,7 +235,6 @@ void CubeRoom::_render_room(float time) const {
   /* move camera around */
   math::Quat view(math::Axis3(1.f, 0.f, 0.f), time*0.5f);
   _slabViewIndex.push(view.to_matrix());
-  //_slabViewIndex.push(math::Mat44::trslt({0., 0., sin(time)}));
 
   /* push size and thickness */
   _slabSizeIndex.push(1.f);
@@ -241,13 +255,16 @@ void CubeRoom::_render_room(float time) const {
  * ============ */
 void CubeRoom::run(float time) const {
   core::state::enable(core::state::DEPTH_TEST);
+  core::state::enable(core::state::BLENDING);
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
   static core::FramebufferHandler fbh;
 
   fbh.unbind(); /* back to the default framebuffer */
+  //core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE);
 
-  _render_room(time);
-//  core::state::clear(core::state::DEPTH_BUFFER);
- // _render_laser(time);
+//  _render_room(time);
+ // core::state::clear(core::state::DEPTH_BUFFER);
+  core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+  _render_laser(time);
 }
 
