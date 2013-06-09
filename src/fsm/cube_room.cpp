@@ -32,6 +32,7 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
   _init_laser_program(width, height);
   _laser.bind();
   _laser.unbind();
+  _init_laser_texture(width, height);
   /* room */
   _init_room();
   _init_room_program(width, height);
@@ -80,6 +81,38 @@ void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
   hheightIndex.push(LASER_HHEIGHT);
 
   _laserSP.unuse();
+}
+
+void CubeRoom::_init_laser_texture(ushort width, ushort height) {
+  core::Framebuffer fb;
+  core::FramebufferHandler fbh;
+  core::Renderbuffer rb;
+  core::RenderbufferHandler rbh;
+  core::TextureHandler<1> texh;
+  tech::PostProcess generator("laser texture generator", misc::from_file("../../src/fsm/laser_texgen-fs.glsl").c_str(), width, height);
+
+  rbh.bind(core::Renderbuffer::RENDERBUFFER, rb);
+  rbh.store(width, height, core::Texture::IF_DEPTH_COMPONENT);
+  rbh.unbind();
+
+  texh.bind(core::Texture::T_2D, _laserTexture);
+  texh.parameter(core::Texture::P_WRAP_S, core::Texture::PV_CLAMP_TO_EDGE);
+  texh.parameter(core::Texture::P_WRAP_T, core::Texture::PV_CLAMP_TO_EDGE);
+  texh.parameter(core::Texture::P_MIN_FILTER, core::Texture::PV_LINEAR);
+  texh.parameter(core::Texture::P_MAG_FILTER, core::Texture::PV_LINEAR);
+  texh.image_2D(width, height, 0, core::Texture::F_RGBA, core::Texture::IF_RGBA, core::GLT_FLOAT, 0, nullptr);
+  texh.unbind();
+
+  fbh.bind(core::Framebuffer::DRAW, fb);
+  fbh.attach_2D_texture(_laserTexture, core::Framebuffer::COLOR_ATTACHMENT);
+  fbh.attach_renderbuffer(rb, core::Framebuffer::DEPTH_ATTACHMENT);
+
+  /* make the texture */
+  generator.start();
+  generator.apply(0.f);
+  generator.end();
+
+  fbh.unbind();
 }
 
 void CubeRoom::_init_laser_blur(ushort width, ushort height) {

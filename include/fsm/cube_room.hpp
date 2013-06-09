@@ -24,6 +24,8 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Program::Uniform _laserTimeIndex;
   sky::core::Program::Uniform _laserViewIndex;
   void _init_laser_uniforms(sky::ushort width, sky::ushort height);
+  sky::core::Texture _laserTexture;
+  void _init_laser_texture(sky::ushort height, sky::ushort width);
 
   /* laser blur */
   sky::tech::PostProcess _laserHBlur;
