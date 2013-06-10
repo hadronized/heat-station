@@ -11,9 +11,9 @@ namespace {
   float  const FOVY             = math::PI*70.f/180.f; /* 90 degrees */
   float  const ZNEAR            = 0.001f;
   float  const ZFAR             = 100.f;
-  ushort const TESS_LASER_LEVEL = 18;
-  ushort const BLUR_PASSES      = 0;
-  float  const LASER_HHEIGHT    = 0.25;
+  ushort const TESS_LASER_LEVEL = 13;
+  ushort const BLUR_PASSES      = 3;
+  float  const LASER_HHEIGHT    = 0.15;
 }
 
 /* ============
@@ -71,6 +71,7 @@ void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
   auto vnbIndex     = _laserSP.map_uniform("vnb");
   auto projIndex    = _laserSP.map_uniform("proj");
   auto hheightIndex = _laserSP.map_uniform("hheight");
+  auto laserTex     = _laserSP.map_uniform("lasertex");
   _laserTimeIndex   = _laserSP.map_uniform("t");
   //_laserViewIndex = _laserSP.map_uniform("view");
 
@@ -79,6 +80,7 @@ void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
   vnbIndex.push(1.f * TESS_LASER_LEVEL, 1.f / TESS_LASER_LEVEL);
   projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
   hheightIndex.push(LASER_HHEIGHT);
+  laserTex.push(0);
 
   _laserSP.unuse();
 }
@@ -130,7 +132,7 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
     texh.parameter(core::Texture::P_WRAP_T, core::Texture::PV_CLAMP_TO_BORDER);
     texh.parameter(core::Texture::P_MIN_FILTER, core::Texture::PV_LINEAR);
     texh.parameter(core::Texture::P_MAG_FILTER, core::Texture::PV_LINEAR);
-    texh.image_2D(width, height, 0, core::Texture::F_RGB, core::Texture::IF_RGB, core::GLT_FLOAT, 0, nullptr);
+    texh.image_2D(width, height, 0, core::Texture::F_RGBA, core::Texture::IF_RGBA, core::GLT_FLOAT, 0, nullptr);
     texh.unbind();
 
     fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[i]);
@@ -152,8 +154,15 @@ void CubeRoom::_render_laser(float time) const {
 
   _laserTimeIndex.push(time);
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
+  texh.bind(core::Texture::T_2D, _laserTexture);
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
+  core::state::enable(core::state::BLENDING);
+  core::state::disable(core::state::DEPTH_TEST);
+  core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE);
   _laser.render(core::primitive::LINE_STRIP, 0, TESS_LASER_LEVEL+1);
+  core::state::enable(core::state::DEPTH_TEST);
+  core::state::disable(core::state::BLENDING);
+  texh.unbind();
   fbh.unbind();
   _laserSP.unuse();
 
@@ -293,7 +302,7 @@ void CubeRoom::run(float time) const {
   static core::FramebufferHandler fbh;
 
   fbh.unbind(); /* back to the default framebuffer */
-  //core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE);
+  //core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE_MINUS_SRC_ALPHA);
 
 //  _render_room(time);
  // core::state::clear(core::state::DEPTH_BUFFER);

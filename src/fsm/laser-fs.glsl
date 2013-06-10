@@ -1,7 +1,10 @@
 #version 330 core
 
+in vec2 gUV;
 out vec4 frag;
 
+uniform sampler2D lasertex;
+
 void main() {
-  frag = vec4(0.68, 0., 0., 1.);
+  frag = texture2D(lasertex, gUV);
 }

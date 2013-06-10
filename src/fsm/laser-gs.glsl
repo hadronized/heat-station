@@ -15,11 +15,11 @@ Output planes:
 #version 330 core
 
 layout (lines) in;
-layout (triangle_strip, max_vertices=24) out;
+layout (triangle_strip, max_vertices=16) out;
 
 in vec3 vCo[]; /* vertex shader coordinates */
 
-out vec2 gUV[]; /* geometry shader texture UV */
+out vec2 gUV; /* geometry shader texture UV */
 
 uniform float hheight; /* half height of each plane */
 uniform mat4 proj;
@@ -31,21 +31,27 @@ void emit(vec3 a) {
 }
 
 void emit_plane(vec3 a, vec3 b, vec3 c, vec3 d) {
+  gUV = vec2(0., 0.);
   emit(a);
+
+  gUV = vec2(1., 0.);
   emit(b);
+
+  gUV = vec2(0., 1.);
   emit(c);
+
+  gUV = vec2(1., 1.);  
   emit(d);
+
   EndPrimitive();
 }
 
 void main() {
-  float d = distance(vCo[0], vCo[1]);
-
   /* hplane */
-  vec3 a = vec3(vCo[0].x-hheight, vCo[0].yz);
-  vec3 b = vec3(vCo[0].x+hheight, vCo[0].yz);
-  vec3 c = vec3(vCo[1].x-hheight, vCo[1].yz);
-  vec3 d = vec3(vCo[1].x+hheight, vCo[1].yz);
+  vec3 a = vec3(vCo[0].x-hheight, vCo[0].yz); 
+  vec3 b = vec3(vCo[0].x+hheight, vCo[0].yz); 
+  vec3 c = vec3(vCo[1].x-hheight, vCo[1].yz); 
+  vec3 d = vec3(vCo[1].x+hheight, vCo[1].yz); 
   emit_plane(a, b, c, d);
 
   /* vplane */
