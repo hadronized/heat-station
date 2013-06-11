@@ -13,5 +13,5 @@ void main() {
   /* displacement */
   vCo.xy += vec2(cos(t)*1., sin(t)*1.);
   vCo.y += sin(vCo.z*2.*PI+t*20.)/30.;
-  vCo.z -= 3.;
+  //vCo.z -= 3.;
 }
