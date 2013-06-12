@@ -271,7 +271,14 @@ void CubeRoom::_render_room(float time) const {
   _slabSP.use();
   
   /* move camera around */
-  math::Quat view(math::Axis3(1.f, 0.f, 0.f), time*0.5f);
+  /* position */
+  math::Mat44 pos = math::Mat44::trslt(-math::Vec3<float>(-1.f, 0.f, 0.f));
+
+  /* orientation */
+  math::Quat view(math::Axis3(0.f, 1.f, 0.f), time*0.5f);
+  //_slabViewIndex.push(view.to_matrix());
+  math::Mat44 m;
+  m.identity();
   _slabViewIndex.push(view.to_matrix());
 
   /* push size and thickness */
@@ -304,6 +311,5 @@ void CubeRoom::run(float time) const {
   core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE);
   _render_laser(time);
   core::state::disable(core::state::BLENDING);
-
 }
 
