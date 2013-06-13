@@ -69,16 +69,15 @@ void CubeRoom::_init_laser_program(ushort width, ushort height) {
 
 void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
   auto vnbIndex     = _laserSP.map_uniform("vnb");
-  auto projIndex    = _laserSP.map_uniform("proj");
   auto hheightIndex = _laserSP.map_uniform("hheight");
   auto laserTex     = _laserSP.map_uniform("lasertex");
+  _laserProjIndex   = _laserSP.map_uniform("proj");
+  _laserViewIndex   = _laserSP.map_uniform("view");
   _laserTimeIndex   = _laserSP.map_uniform("t");
-  //_laserViewIndex = _laserSP.map_uniform("view");
 
   _laserSP.use();
 
   vnbIndex.push(1.f * TESS_LASER_LEVEL, 1.f / TESS_LASER_LEVEL);
-  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
   hheightIndex.push(LASER_HHEIGHT);
   laserTex.push(0);
 
@@ -141,7 +140,7 @@ void CubeRoom::_init_laser_blur(ushort width, ushort height) {
   }
 }
 
-void CubeRoom::_render_laser(float time) const {
+void CubeRoom::_render_laser(float time, math::Mat44 const &proj, math::Mat44 const &view) const {
   static core::FramebufferHandler fbh;
   static core::TextureHandler<1> texh;
   int offtexid = 0;
@@ -149,8 +148,8 @@ void CubeRoom::_render_laser(float time) const {
   /* first, render the lined laser into a framebuffer */
   _laserSP.use();
 
-  math::Quat view(math::Axis3(0.f, 1.f, 0.f), sinf(time*0.5f));
-  //_laserViewIndex.push(view.to_matrix());
+  _laserProjIndex.push(proj);
+  _laserViewIndex.push(view);
 
   _laserTimeIndex.push(time);
   fbh.bind(core::Framebuffer::DRAW, _laserBlurFB[0]);
@@ -240,14 +239,18 @@ void CubeRoom::_init_room() {
 
 void CubeRoom::_init_room_program(ushort width, ushort height) {
   core::Shader vs(core::Shader::VERTEX);
+  core::Shader gs(core::Shader::GEOMETRY);
   core::Shader fs(core::Shader::FRAGMENT);
 
   vs.source(misc::from_file("../../src/fsm/room-vs.glsl").c_str());
   vs.compile("room vertex shader");
+  gs.source(misc::from_file("../../src/fsm/room-gs.glsl").c_str());
+  gs.compile("room geometry shader");
   fs.source(misc::from_file("../../src/fsm/room-fs.glsl").c_str());
   fs.compile("room fragment shader");
 
   _slabSP.attach(vs);
+  _slabSP.attach(gs);
   _slabSP.attach(fs);
   _slabSP.link();
 
@@ -255,37 +258,22 @@ void CubeRoom::_init_room_program(ushort width, ushort height) {
 }
 
 void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
-  auto projIndex      = _slabSP.map_uniform("proj");
+  _slabProjIndex      = _slabSP.map_uniform("proj");
   _slabViewIndex      = _slabSP.map_uniform("view");
   _slabSizeIndex      = _slabSP.map_uniform("size");
   _slabThicknessIndex = _slabSP.map_uniform("thickness");
-
-  _slabSP.use();
-  projIndex.push(math::Mat44::perspective(FOVY, 1.f * width / height, ZNEAR, ZFAR));
-  math::Mat44 view;
-  view.identity();
-  _slabSP.unuse();
 }
 
-void CubeRoom::_render_room(float time) const {
+void CubeRoom::_render_room(float time, math::Mat44 const &proj, math::Mat44 const &view) const {
   _slabSP.use();
   
   /* move camera around */
-  /* position */
-  math::Mat44 pos = math::Mat44::trslt(-math::Vec3<float>(-1.f, 0.f, 0.f));
-
-  /* orientation */
-  math::Quat view(math::Axis3(0.f, 1.f, 0.f), time*0.5f);
-  //_slabViewIndex.push(view.to_matrix());
-  math::Mat44 m;
-  m.identity();
-  _slabViewIndex.push(view.to_matrix());
+  _slabProjIndex.push(proj);
+  _slabViewIndex.push(view);
 
   /* push size and thickness */
   _slabSizeIndex.push(1.f);
   _slabThicknessIndex.push(1.f);
-  auto timeIndex = _slabSP.map_uniform("t");
-  timeIndex.push(time);
   
   /* render walls */
   _slab.bind();
@@ -301,15 +289,20 @@ void CubeRoom::_render_room(float time) const {
 void CubeRoom::run(float time) const {
   static core::FramebufferHandler fbh;
 
+  /* projection */
+  auto proj = math::Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
+  auto view = math::Mat44::trslt(-math::Vec3<float>(1.f, cosf(time), sinf(time))) * math::Quat(math::Axis3(0.f, 1.f, 0.f), math::PI_2).to_matrix();
+
+  /* view */
   fbh.unbind(); /* back to the default framebuffer */
 
   core::state::enable(core::state::DEPTH_TEST);
   core::state::clear(core::state::COLOR_BUFFER | core::state::DEPTH_BUFFER);
 
-  _render_room(time);
+  _render_room(time, proj, view);
   core::state::enable(core::state::BLENDING);
   core::Framebuffer::blend_func(core::blending::ONE, core::blending::ONE);
-  _render_laser(time);
+  _render_laser(time, proj, view);
   core::state::disable(core::state::BLENDING);
 }
 

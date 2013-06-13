@@ -8,10 +8,9 @@ const float PI = 3.141592;
 
 void main() {
   /* laser */
-  vCo = vec3(0., 0., -(vnb.x*.5 - gl_VertexID*vnb.y*10.));
+  vCo = vec3(0., 0., -gl_VertexID*vnb.y*5. + 2.5);
 
   /* displacement */
-  vCo.xy += vec2(cos(t)*1., sin(t)*1.);
+  //vCo.xy += vec2(cos(t)*1., sin(t)*1.);
   vCo.y += sin(vCo.z*2.*PI+t*20.)/30.;
-  //vCo.z -= 3.;
 }

@@ -26,7 +26,7 @@ uniform mat4 proj;
 uniform mat4 view;
 
 void emit(vec3 a) {
-  gl_Position = proj * vec4(a, 1.);
+  gl_Position = proj * view * vec4(a, 1.);
   EmitVertex();
 }
 

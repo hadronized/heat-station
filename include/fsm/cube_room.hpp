@@ -22,6 +22,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Program _laserSP;
   void _init_laser_program(sky::ushort width, sky::ushort height);
   sky::core::Program::Uniform _laserTimeIndex;
+  sky::core::Program::Uniform _laserProjIndex;
   sky::core::Program::Uniform _laserViewIndex;
   void _init_laser_uniforms(sky::ushort width, sky::ushort height);
   sky::core::Texture _laserTexture;
@@ -42,12 +43,13 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::VertexArray _laserBillboard;
   sky::core::Program _laserBillboardSP;
 
-  void _render_laser(float time) const;
+  void _render_laser(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
   /* room */
   sky::core::VertexArray _slab;
   sky::core::Buffer _slabIBO;
   sky::core::Program _slabSP;
+  sky::core::Program::Uniform _slabProjIndex;
   sky::core::Program::Uniform _slabViewIndex;
   sky::core::Program::Uniform _slabSizeIndex;
   sky::core::Program::Uniform _slabThicknessIndex;
@@ -55,7 +57,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _init_room_program(sky::ushort width, sky::ushort height);
   void _init_room_uniforms(sky::ushort width, sky::ushort height);
   
-  void _render_room(float time) const;
+  void _render_room(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height);
