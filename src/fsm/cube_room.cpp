@@ -217,12 +217,12 @@ void CubeRoom::_init_room() {
     /* bottom face */
     , 2, 3, 7
     , 2, 7, 6
-    /* right face */
-    , 0, 3, 4
-    , 3, 4, 7
     /* left face */
     , 1, 2, 5
     , 2, 5, 6
+    /* right face */
+    , 0, 3, 4
+    , 3, 4, 7
   };
 
   /* IBO */
@@ -277,7 +277,7 @@ void CubeRoom::_render_room(float time, math::Mat44 const &proj, math::Mat44 con
   
   /* render walls */
   _slab.bind();
-  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 150);
+  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 250);
   _slab.unbind();
   
   _slabSP.unuse();
@@ -291,7 +291,7 @@ void CubeRoom::run(float time) const {
 
   /* projection */
   auto proj = math::Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = math::Mat44::trslt(-math::Vec3<float>(1.f, cosf(time), sinf(time))) * math::Quat(math::Axis3(0.f, 1.f, 0.f), math::PI_2+time*0.1f).to_matrix();
+  auto view = math::Mat44::trslt(-math::Vec3<float>(1.f, cosf(time), sinf(time))*3.f) * math::Quat(math::Axis3(0.f, 1.f, 0.f), math::PI_2+time*0.5f).to_matrix();
 
   /* view */
   fbh.unbind(); /* back to the default framebuffer */

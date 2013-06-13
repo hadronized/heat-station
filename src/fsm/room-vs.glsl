@@ -1,6 +1,7 @@
 #version 330 core
 
 out vec3 vco; /* space coordinates as vertex shader output */
+out vec3 vno; /* normal as vertex shader output */
 
 uniform float size;      /* size of the slab */
 uniform float thickness; /* thickness of the slab: 0. = 0., 1. = size */
@@ -22,21 +23,21 @@ vec3[8] v = vec3[] (
 );
 
 void main() {
-  float foo = offset * 5.;
+  float foo = offset * 10.;
   vco = v[gl_VertexID];
 
-  if (gl_InstanceID < 25) {
-    vco += vec3(mod(gl_InstanceID, 5)*offset, floor(gl_InstanceID/5)*offset, 0.);
-  } else if (gl_InstanceID < 50) {
-    vco += vec3(mod(gl_InstanceID-25, 5)*offset, floor((gl_InstanceID-25)/5)*offset, foo);
-  } else if (gl_InstanceID < 75) {
-    vco += vec3(0., floor((gl_InstanceID-50)/5)*offset, mod(gl_InstanceID-50, 5)*offset);
+  if (gl_InstanceID < 50) {
+    vco += vec3(mod(gl_InstanceID, 10)*offset, floor(gl_InstanceID/10)*offset, 0.);
   } else if (gl_InstanceID < 100) {
-    vco += vec3(foo, floor((gl_InstanceID-75)/5)*offset, mod(gl_InstanceID-75, 5)*offset);
-  } else if (gl_InstanceID < 125) {
-    vco += vec3(mod(gl_InstanceID-100, 5)*offset, 0., floor((gl_InstanceID-100)/5)*offset);
+    vco += vec3(mod(gl_InstanceID-50, 10)*offset, floor((gl_InstanceID-50)/10)*offset, foo);
+  } else if (gl_InstanceID < 150) {
+    vco += vec3(0., floor((gl_InstanceID-100)/10)*offset, mod(gl_InstanceID-100, 10)*offset);
+  } else if (gl_InstanceID < 200) {
+    vco += vec3(foo, floor((gl_InstanceID-150)/10)*offset, mod(gl_InstanceID-150, 10)*offset);
+  } else if (gl_InstanceID < 250) {
+    vco += vec3(mod(gl_InstanceID-200, 10)*offset, 0., floor((gl_InstanceID-200)/10)*offset);
   } else {
-    vco += vec3(mod(gl_InstanceID-125, 5)*offset, foo, floor((gl_InstanceID-125)/5)*offset);
+    vco += vec3(mod(gl_InstanceID-250, 10)*offset, foo, floor((gl_InstanceID-250)/10)*offset);
   }
-  vco -= foo * 0.5;
+  vco -= vec3(offset*10, offset*5, offset*10) * 0.5;
 }

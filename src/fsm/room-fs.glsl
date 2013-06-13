@@ -2,8 +2,8 @@
 
 uniform mat4 view;
 
-in vec3 gco;       /* vertex shader space coordinates */
-in vec3 gno;  /* vertex shader normal */
+in vec3 gco; /* vertex shader space coordinates */
+in vec3 gno; /* vertex shader normal */
 
 out vec4 frag;
 
