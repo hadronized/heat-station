@@ -209,20 +209,20 @@ void CubeRoom::_init_room() {
       0, 1, 2
     , 0, 2, 3
     /* back face */
-    , 4, 5, 7
-    , 5, 7, 6
+    , 4, 5, 6
+    , 4, 6, 7
     /* up face */
-    , 0, 1, 4
+    , 0, 1, 4 
     , 1, 4, 5
     /* bottom face */
     , 2, 3, 7
     , 2, 7, 6
-    /* left face */
-    , 1, 2, 5
-    , 2, 5, 6
     /* right face */
     , 0, 3, 4
     , 3, 4, 7
+    /* left face */
+    , 1, 2, 5
+    , 2, 5, 6
   };
 
   /* IBO */
@@ -291,7 +291,7 @@ void CubeRoom::run(float time) const {
 
   /* projection */
   auto proj = math::Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = math::Mat44::trslt(-math::Vec3<float>(1.f, cosf(time), sinf(time))) * math::Quat(math::Axis3(0.f, 1.f, 0.f), math::PI_2).to_matrix();
+  auto view = math::Mat44::trslt(-math::Vec3<float>(1.f, cosf(time), sinf(time))) * math::Quat(math::Axis3(0.f, 1.f, 0.f), math::PI_2+time*0.1f).to_matrix();
 
   /* view */
   fbh.unbind(); /* back to the default framebuffer */

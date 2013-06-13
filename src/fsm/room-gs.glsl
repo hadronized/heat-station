@@ -24,7 +24,17 @@ void emit(int i) {
 
 void main() {
   /* compute normal */
-  gno = normalize(cross(rco[2]-rco[1], rco[2]-rco[0]));
+  if (gl_PrimitiveIDIn < 4) {
+    gno = vec3(0., 0., 1.);
+  } else if (gl_PrimitiveIDIn < 8) {
+    gno = vec3(0., 1., 0.);
+  } else {
+    gno = vec3(1., 0., 0.);
+  }
+  if (gl_PrimitiveIDIn / 2 == 1.)
+    gno = -gno;
+
+  /* emit the vertices */
   for (int i = 0; i < 3; ++i)
     emit(i);
 }

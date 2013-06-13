@@ -1,6 +1,5 @@
 #version 330 core
 
-out vec3 rco; 
 out vec3 vco; /* space coordinates as vertex shader output */
 
 uniform float size;      /* size of the slab */
@@ -24,8 +23,7 @@ vec3[8] v = vec3[] (
 
 void main() {
   float foo = offset * 5.;
-  rco = v[gl_VertexID];
-  vco = rco;
+  vco = v[gl_VertexID];
 
   if (gl_InstanceID < 25) {
     vco += vec3(mod(gl_InstanceID, 5)*offset, floor(gl_InstanceID/5)*offset, 0.);
