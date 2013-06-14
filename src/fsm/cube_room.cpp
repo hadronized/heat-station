@@ -277,7 +277,7 @@ void CubeRoom::_render_room(float time, math::Mat44 const &proj, math::Mat44 con
   
   /* render walls */
   _slab.bind();
-  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 250);
+  _slab.inst_indexed_render(core::primitive::TRIANGLE, 36, core::GLT_UINT, 150);
   _slab.unbind();
   
   _slabSP.unuse();

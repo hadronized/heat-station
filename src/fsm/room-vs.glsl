@@ -24,20 +24,21 @@ vec3[8] v = vec3[] (
 
 void main() {
   float foo = offset * 10.;
+  vec2 c = vec2(10*size+9*margin,5*size+4*margin) * 0.5 + size;
   vco = v[gl_VertexID];
 
   if (gl_InstanceID < 50) {
-    vco += vec3(mod(gl_InstanceID, 10)*offset, floor(gl_InstanceID/10)*offset, 0.);
+    vco += vec3(mod(gl_InstanceID, 10)*offset, floor(gl_InstanceID/10)*offset, 0) - vec3(c, c.x);
   } else if (gl_InstanceID < 100) {
-    vco += vec3(mod(gl_InstanceID-50, 10)*offset, floor((gl_InstanceID-50)/10)*offset, foo);
+    vco += vec3(mod(gl_InstanceID-50, 10)*offset, floor((gl_InstanceID-50)/10)*offset, foo) - vec3(c, c.x);
   } else if (gl_InstanceID < 150) {
-    vco += vec3(0., floor((gl_InstanceID-100)/10)*offset, mod(gl_InstanceID-100, 10)*offset);
+    vco += vec3(0., floor((gl_InstanceID-100)/10)*offset, mod(gl_InstanceID-100, 10)*offset) - vec3(c, c.x);
   } else if (gl_InstanceID < 200) {
-    vco += vec3(foo, floor((gl_InstanceID-150)/10)*offset, mod(gl_InstanceID-150, 10)*offset);
+    vco += vec3(foo, floor((gl_InstanceID-150)/10)*offset, mod(gl_InstanceID-150, 10)*offset) - vec3(offset*10, offset*5, offset*10)*0.5 + size;
+
   } else if (gl_InstanceID < 250) {
     vco += vec3(mod(gl_InstanceID-200, 10)*offset, 0., floor((gl_InstanceID-200)/10)*offset);
   } else {
     vco += vec3(mod(gl_InstanceID-250, 10)*offset, foo, floor((gl_InstanceID-250)/10)*offset);
   }
-  vco -= vec3(offset*10, offset*5, offset*10) * 0.5;
 }
