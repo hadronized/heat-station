@@ -264,7 +264,7 @@ void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
   _slabThicknessIndex = _slabSP.map_uniform("thickness");
 }
 
-void CubeRoom::_init_texture(ushort width, ushort height) {
+void CubeRoom::_init_room_texture(ushort width, ushort height) {
 }
 
 void CubeRoom::_render_room(float time, math::Mat44 const &proj, math::Mat44 const &view) const {
