@@ -56,7 +56,8 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _init_room(void);
   void _init_room_program(sky::ushort width, sky::ushort height);
   void _init_room_uniforms(sky::ushort width, sky::ushort height);
-  
+  sky::core::Texture _slabTexture;
+  void _init_room_texture(sky::ushort width, sky::ushort height);
   void _render_room(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
 public :
