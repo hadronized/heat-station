@@ -8,6 +8,7 @@ in vec3 vno[];
 
 out vec3 gco;
 out vec3 gno;
+out vec2 guv;
 
 uniform mat4 proj;
 uniform mat4 view;
@@ -22,7 +23,7 @@ void main() {
   /* cube face ID */
   int faceID = gl_PrimitiveIDIn / 2;
 
-  /* compute normal */
+  /* compute normal and UV coordinates */
   if (faceID < 2) {
     gno = vec3(0., 0., 1.);
   } else if (faceID < 4) {
