@@ -31,7 +31,9 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
     /* laser blur */
   , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
-  , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height) {
+  , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
+    /* water */
+  , _water("water", from_file("../../src/fsm/water-fs.glsl").c_str(), width, height) {
   /* laser */
   _init_laser_program(width, height);
   _laser.bind();
