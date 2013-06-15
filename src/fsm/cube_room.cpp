@@ -4,7 +4,6 @@
 #include <math/matrix.hpp>
 #include <math/quaternion.hpp>
 #include <misc/from_file.hpp>
-#include "globals.hpp"
 
 using namespace sky;
 using namespace core;
@@ -99,13 +98,13 @@ void CubeRoom::_init_laser_texture(ushort width, ushort height) {
   gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT);
   gRBH.unbind();
 
-  g1TH.bind(Texture::T_2D, _laserTexture);
-  g1TH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  g1TH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  g1TH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  g1TH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  g1TH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  g1TH.unbind();
+  gTH1.bind(Texture::T_2D, _laserTexture);
+  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
+  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
+  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
+  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
+  gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+  gTH1.unbind();
 
   gFBH.bind(Framebuffer::DRAW, fb);
   gFBH.attach_2D_texture(_laserTexture, Framebuffer::COLOR_ATTACHMENT);
@@ -205,8 +204,6 @@ void CubeRoom::_render_laser(float time, Mat44 const &proj, Mat44 const &view) c
  * [ Room ]
  * ======== */
 void CubeRoom::_init_room() {
-  BufferHandler bufh;
-
   uint const ids[] = {
     /* front face */
       0, 1, 2
@@ -229,15 +226,15 @@ void CubeRoom::_init_room() {
   };
 
   /* IBO */
-  bufh.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
-  bufh.data(sizeof(uint)*36, Buffer::STATIC_DRAW, ids);
-  bufh.unbind();
+  gBH.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
+  gBH.data(sizeof(uint)*36, Buffer::STATIC_DRAW, ids);
+  gBH.unbind();
 
   /* VA */
   _slab.bind();
-  bufh.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
+  gBH.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
   _slab.unbind(); /* attribute-less render */
-  bufh.unbind();
+  gBH.unbind();
 }
 
 void CubeRoom::_init_room_program(ushort width, ushort height) {
@@ -276,13 +273,13 @@ void CubeRoom::_init_room_texture(ushort width, ushort height) {
   gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT);
   gRBH.unbind();
 
-  g1TH.bind(Texture::T_2D, _slabTexture);
-  g1TH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  g1TH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  g1TH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  g1TH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  g1TH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  g1TH.unbind();
+  gTH1.bind(Texture::T_2D, _slabTexture);
+  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
+  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
+  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
+  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
+  gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+  gTH1.unbind();
 
   gFBH.bind(Framebuffer::DRAW, fb);
   gFBH.attach_2D_texture(_slabTexture, Framebuffer::COLOR_ATTACHMENT);
@@ -309,11 +306,11 @@ void CubeRoom::_render_room(float time, Mat44 const &proj, Mat44 const &view) co
   
   /* render walls */
   /* bind slab texture */
-  g1TH.bind(Texture::T_2D, _slabTexture);
+  gTH1.bind(Texture::T_2D, _slabTexture);
   _slab.bind();
   _slab.inst_indexed_render(primitive::TRIANGLE, 36, GLT_UINT, 600);
   _slab.unbind();
-  g1TH.unbind();
+  gTH1.unbind();
   
   _slabSP.unuse();
 }
