@@ -3,8 +3,10 @@
 #include <math/common.hpp>
 #include <math/matrix.hpp>
 #include <math/quaternion.hpp>
+#include <misc/log.hpp>
 #include <misc/from_file.hpp>
 
+using namespace std;
 using namespace sky;
 using namespace core;
 using namespace math;
@@ -317,6 +319,22 @@ void CubeRoom::_render_room(float time, Mat44 const &proj, Mat44 const &view) co
   _slabSP.unuse();
 }
 
+/* =========
+ * [ Water ]
+ * ========= */
+void CubeRoom::_init_water() {
+  _water.start();
+  auto fovy = _water.program().map_uniform("fovy");
+  fovy.push(FOVY);
+  _water.end();
+}
+
+void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) const {
+  _water.start();
+  _water.apply(time);
+  _water.end();
+}
+
 /* ============
  * [ CubeRoom ]
  * ============ */
@@ -338,5 +356,8 @@ void CubeRoom::run(float time) const {
   Framebuffer::blend_func(blending::ONE, blending::ONE);
   _render_laser(time, proj, view);
   state::disable(state::BLENDING);
+
+  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+  _render_water(time, proj, view);
 }
 
