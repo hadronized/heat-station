@@ -20,6 +20,11 @@ namespace {
   ushort const TESS_LASER_LEVEL = 13;
   ushort const BLUR_PASSES      = 3;
   float  const LASER_HHEIGHT    = 0.15;
+  ushort const WATER_WIDTH      = 20;
+  ushort const WATER_HEIGHT     = 20;
+  ushort const WATER_TWIDTH     = 40;
+  ushort const WATER_THEIGHT    = 40;
+  ushort const WATER_RES        = WATER_TWIDTH * WATER_THEIGHT;
 }
 
 /* ============
@@ -35,16 +40,21 @@ CubeRoom::CubeRoom(ushort width, ushort height) :
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
   , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
     /* water */
-  , _water("water", from_file("../../src/fsm/water-fs.glsl").c_str(), width, height) {
+  , _water(WATER_WIDTH, WATER_HEIGHT, WATER_TWIDTH, WATER_THEIGHT) {
   /* laser */
   _init_laser_program(width, height);
   _laser.bind();
   _laser.unbind();
   _init_laser_texture(width, height);
+
   /* room */
   _init_room();
   _init_room_program(width, height);
   _init_room_texture(256, 256);
+
+  /* water */
+  _init_water_program();
+  _init_water();
 }
 
 CubeRoom::~CubeRoom() {
@@ -322,41 +332,68 @@ void CubeRoom::_render_room(float time, Mat44 const &proj, Mat44 const &view) co
 /* =========
  * [ Water ]
  * ========= */
+void CubeRoom::_init_water_program() {
+  Shader vs(Shader::VERTEX);
+  Shader fs(Shader::FRAGMENT);
+
+  vs.source(from_file("../../src/fsm/water-vs.glsl").c_str());
+  vs.compile("water vertex shader");
+  fs.source(from_file("../../src/fsm/water-fs.glsl").c_str());
+  fs.compile("water fragment shader");
+
+  _waterSP.attach(vs);
+  _waterSP.attach(fs);
+  _waterSP.link();
+
+  _init_water_uniforms();
+}
+
+void CubeRoom::_init_water_uniforms() {
+  /* uniforms */
+  _waterProjIndex = _waterSP.map_uniform("proj");
+  _waterViewIndex = _waterSP.map_uniform("view");
+  _waterTimeIndex = _waterSP.map_uniform("time");
+}
+
 void CubeRoom::_init_water() {
+#if 0
   _water.start();
   auto fovy = _water.program().map_uniform("fovy");
   fovy.push(FOVY);
   _water.end();
+#endif
 }
 
 void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) const {
-  _water.start();
-  _water.apply(time);
-  _water.end();
+  _waterSP.use();
+  _waterProjIndex.push(proj);
+  _waterViewIndex.push(view);
+  _waterTimeIndex.push(time);
+  _water.va.indexed_render(primitive::TRIANGLE, WATER_RES*6, GLT_UINT);
+  _waterSP.unuse();
 }
 
 /* ============
  * [ CubeRoom ]
  * ============ */
 void CubeRoom::run(float time) const {
-  static FramebufferHandler fbh;
-
-  /* projection */
+  /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = Mat44::trslt(-Vec3<float>(1.f, cosf(time), sinf(time))*3.f) * Quat(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  auto view = Mat44::trslt(-Vec3<float>(1.f, /*cosf(time)*/1.f, /*sinf(time))*3.f*/1.f)*2.f) * Quat(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
 
-  /* view */
-  fbh.unbind(); /* back to the default framebuffer */
-
+  /* walls */
   state::enable(state::DEPTH_TEST);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-
   _render_room(time, proj, view);
+
+  /* laser */
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);
   _render_laser(time, proj, view);
   state::disable(state::BLENDING);
 
+  /* water */
+  state::clear(/*state::COLOR_BUFFER |*/ state::DEPTH_BUFFER);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _render_water(time, proj, view);
 }

@@ -7,6 +7,7 @@
 #include <core/shader.hpp>
 #include <core/texture.hpp>
 #include <core/vertex_array.hpp>
+#include <data/subplane.hpp>
 #include <lang/primtypes.hpp>
 #include <sync/parts_fsm.hpp>
 #include <tech/framebuffer_copy.hpp>
@@ -61,7 +62,13 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _render_room(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
   /* water */
-  sky::tech::TemporalPostProcess _water;
+  sky::core::Program _waterSP;
+  void _init_water_program(void);
+  sky::core::Program::Uniform _waterProjIndex;
+  sky::core::Program::Uniform _waterViewIndex;
+  sky::core::Program::Uniform _waterTimeIndex;
+  void _init_water_uniforms(void);
+  sky::data::SubPlane _water;
   void _init_water(void);
   void _render_water(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
