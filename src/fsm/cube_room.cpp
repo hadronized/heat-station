@@ -379,22 +379,22 @@ void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) c
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = Mat44::trslt(-Vec3<float>(1.f, /*cosf(time)*/1.f, /*sinf(time))*3.f*/1.f)*2.f) * Quat(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  //auto view = Mat44::trslt(-Vec3<float>(1.f, /*cosf(time)*/1.f, /*sinf(time))*3.f*/1.f)*1.f) * Quat(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  auto view = Mat44::trslt(-Vec3<float>(cosf(time), 0.5f, 1.f));
 
   /* walls */
   state::enable(state::DEPTH_TEST);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _render_room(time, proj, view);
 
-  /* laser */
+  /* water */
   state::enable(state::BLENDING);
+  Framebuffer::blend_func(blending::ONE, blending::DST_ALPHA);
+  _render_water(time, proj, view);
+
+  /* laser */
   Framebuffer::blend_func(blending::ONE, blending::ONE);
   _render_laser(time, proj, view);
   state::disable(state::BLENDING);
-
-  /* water */
-  state::clear(/*state::COLOR_BUFFER |*/ state::DEPTH_BUFFER);
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  _render_water(time, proj, view);
 }
 
