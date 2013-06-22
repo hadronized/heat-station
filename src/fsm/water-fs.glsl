@@ -27,7 +27,7 @@ void main() {
   frag = vec4(1.) * waterDiffuse + vec4(0.75, 0., 0., 1.) * waterSpecular;
   frag /= laserDist * 1.;
   
-  //frag = vec4(vno, 1.);
+  //frag = vec4(vno*0.5 + 0.5, 1.);
 
   //frag.w = 0.4; /* water opacity */
 }
