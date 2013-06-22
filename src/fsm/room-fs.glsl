@@ -13,5 +13,5 @@ void main() {
   vec3 lvco = lpos - gco;
   vec3 ldir = normalize(lvco); /* light ray */
 
-  frag = vec4(1.) * max(0., dot(gno, ldir)) / sqrt(length(lvco)) * 0.9;
+  frag = vec4(0.6) * max(0., dot(gno, ldir)) / log(length(lvco)) * 0.1;
 }

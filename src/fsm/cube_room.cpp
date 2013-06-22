@@ -1,4 +1,5 @@
 #include <core/state.hpp>
+#include <core/viewport.hpp>
 #include <fsm/cube_room.hpp>
 #include <math/common.hpp>
 #include <math/matrix.hpp>
@@ -20,10 +21,10 @@ namespace {
   ushort const TESS_LASER_LEVEL = 13;
   ushort const BLUR_PASSES      = 3;
   float  const LASER_HHEIGHT    = 0.15;
-  ushort const WATER_WIDTH      = 20;
-  ushort const WATER_HEIGHT     = 20;
-  ushort const WATER_TWIDTH     = 40;
-  ushort const WATER_THEIGHT    = 40;
+  ushort const WATER_WIDTH      = 10;
+  ushort const WATER_HEIGHT     = 10;
+  ushort const WATER_TWIDTH     = 20;
+  ushort const WATER_THEIGHT    = 20;
   ushort const WATER_RES        = WATER_TWIDTH * WATER_THEIGHT;
 }
 
@@ -381,6 +382,9 @@ void CubeRoom::run(float time) const {
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   //auto view = Mat44::trslt(-Vec3<float>(1.f, /*cosf(time)*/1.f, /*sinf(time))*3.f*/1.f)*1.f) * Quat(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
   auto view = Mat44::trslt(-Vec3<float>(cosf(time), 0.5f, 1.f));
+
+  /* viewport */
+  //viewport(0, _height / 2, _width / 2, _height / 2);
 
   /* walls */
   state::enable(state::DEPTH_TEST);

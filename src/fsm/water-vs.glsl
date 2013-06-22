@@ -9,6 +9,8 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform float time;
 
+const float h = 0.0001;
+
 float water(vec2 xy) {
   float w =
       sin(xy.x*8.)
@@ -18,10 +20,19 @@ float water(vec2 xy) {
   return w / 3.;
 }
 
+vec3 deriv_no(vec2 xy, float h) {
+  float wxy = water(xy);
+  float dx = water(vec2(xy.x+h, xy.y)) - wxy;
+  float dy = water(vec2(xy.x, xy.y+h)) - wxy;
+
+  return normalize(vec3(-dx, -dy, h));
+}
+
 void main() {
-  vco = vec3(co.x, water(co.xy+time*0.25)*0.5, co.y);
+  vec2 lookup = co.xy*0.2+time*0.5;
+  vco = vec3(co.x, water(co.xy*0.2+time*0.5)*0.5, co.y);
   vco.y -= 2.; /* height */
-  vno = vec3(0., 1., 0.);
+  vno = deriv_no(lookup, h); 
 
   gl_Position = proj * view * vec4(vco, 1.);
 }
