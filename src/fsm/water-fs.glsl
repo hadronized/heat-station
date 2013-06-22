@@ -19,8 +19,15 @@ void main() {
   frag = liquidDiffuse / log(pow(laserDist, 2.)) * 0.5;
 
   /* water phong */
-
-  frag.w = 0.4; /* water opacity */
+  vec3 lightPos = vec3(0., 50., 0.);
+  vec3 ldir = lightPos - vco;
+  vec3 nldir = normalize(ldir);
+  float waterDiffuse = max(0., dot(nldir, vno));
+  float waterSpecular = pow(max(0., dot(reflect(normalize(vco-eye), vno), nldir)), 10.);
+  frag = vec4(1.) * waterDiffuse + vec4(0.75, 0., 0., 1.) * waterSpecular;
+  frag /= laserDist * 1.;
   
-  frag = vec4(vno, 1.);
+  //frag = vec4(vno, 1.);
+
+  //frag.w = 0.4; /* water opacity */
 }
