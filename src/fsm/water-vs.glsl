@@ -14,11 +14,12 @@ const float a = 0.5;
 
 float water(vec2 xy) {
   float w =
-      sin(xy.x*8.)
+      sin(xy.x*8.+time*3.)
     + sin(xy.y*8.)
-    + sin(length(xy)*10.+time*6.)
+    + sin(length(xy+vec2(cos(time*0.5), sin(time*0.5))+1.)*10.+time*6.)
+    + sin(xy.x*10.+time*6.) * sin(xy.y*6)
     ;
-  return w / 3. * a;
+  return w / 4. * a;
 }
 
 vec3 deriv_no(vec2 xz, float h) {
