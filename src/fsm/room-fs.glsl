@@ -9,9 +9,11 @@ out vec4 frag;
 
 void main() {
   vec3 eye  = inverse(view)[3].xyz; /* camera position */
-  vec3 lpos = vec3(0., 0., 0.); /* light pos */
-  vec3 lvco = lpos - gco;
+  vec3 lvco = -vec3(gco.xy, 0.);
   vec3 ldir = normalize(lvco); /* light ray */
+  float laserDist = length(lvco);
+  float diffuse = max(0., dot(gno, ldir));
 
-  frag = vec4(0.6) * max(0., dot(gno, ldir)) / log(length(lvco)) * 0.1;
+  frag = vec4(0.6) * diffuse / (log(laserDist)*2.5);
+  frag += vec4(0.75, 0., 0., 1.) * diffuse / (pow(laserDist, 4.) * 0.1);
 }

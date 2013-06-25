@@ -9,7 +9,7 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform float time;
 
-const float h = 0.0001;
+const float h = 0.00001;
 const float a = 0.5;
 
 float water(vec2 xy) {
