@@ -1,10 +1,11 @@
-CXX           = clang++
+CXX           = g++
 PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_FMODEX_SYNTH
-CXXFLAGS      = -g -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
+CXXFLAGS      = -Os -s -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
 LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lfmodex
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
 EXEC          = $(RELEASE).bin
+XM            = CentralStation.xm
 PACKER        = $(RELEASE)
 COMPRESS_LVL  = 6
 OBJ           = \
@@ -34,9 +35,12 @@ release: all
 	@sstrip -z $(EXEC_DIR_PATH)/$(EXEC)
 	@echo "-- Preparing packer"
 	@cp packer $(EXEC_DIR_PATH)/$(PACKER)
+	@cp $(XM) $(EXEC_DIR_PATH)
 	@echo "-- Compressing"
-	@xz -$(COMPRESS_LVL)ck $(EXEC_DIR_PATH)/$(EXEC) >> $(EXEC_DIR_PATH)/$(PACKER)
+	@xz -$(COMPRESS_LVL)k $(EXEC_DIR_PATH)/$(EXEC) $(EXEC_DIR_PATH)/$(XM)
+	@cd $(EXEC_DIR_PATH) && tar -cO $(EXEC).xz $(XM).xz >> $(PACKER)
 	@chmod +x $(EXEC_DIR_PATH)/$(PACKER)
+	@rm $(EXEC_DIR_PATH)/*.xz
 	@echo "-- Done!"
 
 main.o: ../src/main.cpp
