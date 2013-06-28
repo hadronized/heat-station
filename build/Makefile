@@ -37,10 +37,8 @@ release: all
 	@cp packer $(EXEC_DIR_PATH)/$(PACKER)
 	@cp $(XM) $(EXEC_DIR_PATH)
 	@echo "-- Compressing"
-	@xz -$(COMPRESS_LVL)k $(EXEC_DIR_PATH)/$(EXEC) $(EXEC_DIR_PATH)/$(XM)
-	@cd $(EXEC_DIR_PATH) && tar -cO $(EXEC).xz $(XM).xz >> $(PACKER)
+	@cd $(EXEC_DIR_PATH) && tar -cJO $(EXEC) $(XM) >> $(PACKER)
 	@chmod +x $(EXEC_DIR_PATH)/$(PACKER)
-	@rm $(EXEC_DIR_PATH)/*.xz
 	@echo "-- Done!"
 
 main.o: ../src/main.cpp

@@ -1,2 +1,2 @@
 #!/bin/sh
-tail -n+3 $0 > a; tar -xf a; xz -d *.xz; ./evoke2013_64k.bin $*; rm a *.bin *.xm; exit 0
+tail -n+3 $0 > a; tar -xJf a; ./evoke2013_64k.bin $*; rm a *.bin *.xm; exit 0
