@@ -382,7 +382,6 @@ void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) c
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  //auto view = Mat44::trslt(-Vec3<float>(4.f, cosf(time), sinf(time))) * Quat(Axis3(0.f, 1.f, 0.f), PI_4+time).to_matrix() * Quat(Axis3(1.f, 0.f, 0.f), -PI_4*0.1f).to_matrix();
   auto view = _freefly.view();
 
   /* viewport */
