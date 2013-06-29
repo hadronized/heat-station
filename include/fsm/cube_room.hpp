@@ -9,6 +9,7 @@
 #include <core/vertex_array.hpp>
 #include <data/subplane.hpp>
 #include <lang/primtypes.hpp>
+#include <scene/freefly.hpp>
 #include <sync/parts_fsm.hpp>
 #include <tech/framebuffer_copy.hpp>
 #include <tech/post_process.hpp>
@@ -17,6 +18,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   /* common */
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
+  sky::scene::Freefly const &_freefly;
 
   /* laser */
   sky::core::VertexArray _laser;
@@ -73,7 +75,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _render_water(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
 public :
-  CubeRoom(sky::ushort width, sky::ushort height);
+  CubeRoom(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);
   ~CubeRoom(void);
 
   void run(float time) const override;

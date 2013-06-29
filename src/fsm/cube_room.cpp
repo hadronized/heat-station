@@ -12,6 +12,7 @@ using namespace sky;
 using namespace core;
 using namespace math;
 using namespace misc;
+using namespace scene;
 using namespace tech;
 
 namespace {
@@ -31,11 +32,12 @@ namespace {
 /* ============
  * [ CubeRoom ]
  * ============ */
-CubeRoom::CubeRoom(ushort width, ushort height) :
+CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
     /* common */
     _width(width)
   , _height(height)
   , _fbCopier(width, height)
+  , _freefly(freefly)
     /* laser blur */
   , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
@@ -380,7 +382,8 @@ void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) c
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = Mat44::trslt(-Vec3<float>(4.f, cosf(time), sinf(time))) * Quat(Axis3(0.f, 1.f, 0.f), PI_4+time).to_matrix() * Quat(Axis3(1.f, 0.f, 0.f), -PI_4*0.1f).to_matrix();
+  //auto view = Mat44::trslt(-Vec3<float>(4.f, cosf(time), sinf(time))) * Quat(Axis3(0.f, 1.f, 0.f), PI_4+time).to_matrix() * Quat(Axis3(1.f, 0.f, 0.f), -PI_4*0.1f).to_matrix();
+  auto view = _freefly.view();
 
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);

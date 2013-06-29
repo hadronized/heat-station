@@ -2,9 +2,10 @@
 #define __FSM_INIT_HPP
 
 #include <lang/primtypes.hpp>
+#include <scene/freefly.hpp>
 #include <sync/parts_fsm.hpp>
 
-sky::sync::PartState * init_sync(sky::ushort width, sky::ushort height);
+sky::sync::PartState * init_sync(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);
 
 #endif /* guard */
 

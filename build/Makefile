@@ -1,7 +1,7 @@
-CXX           = g++
-PLATFORM      = -DSKY_LINUX -DSKY_X11_CONTEXT -DSKY_FMODEX_SYNTH
-CXXFLAGS      = -Os -s -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
-LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lX11 -lfmodex
+CXX           = clang++
+PLATFORM      = -DSKY_LINUX -DSKY_SDL_CONTEXT -DSKY_FMODEX_SYNTH
+CXXFLAGS      = -g -w -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
+LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lSDL -lfmodex
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
 EXEC          = $(RELEASE).bin
