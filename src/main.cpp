@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
           if (leftClick) {
             misc::log << debug << event.motion.xrel << endl;
             freefly.look_around(scene::Orient(math::Vec3<float>(0.f, 1.f, 0.f), 0.5f*event.motion.xrel*math::PI/180.f));
-            //freefly.look_around(scene::Orient(math::Vec3<float>(1.f, 0.f, 0.f), 0.5f*event.motion.yrel*math::PI/180.f));
+            freefly.look_around(scene::Orient(math::Vec3<float>(1.f, 0.f, 0.f), 0.5f*event.motion.yrel*math::PI/180.f));
           }
           break;
 
