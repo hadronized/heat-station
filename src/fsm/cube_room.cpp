@@ -38,6 +38,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _height(height)
   , _fbCopier(width, height)
   , _freefly(freefly)
+  , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
     /* laser blur */
   , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)

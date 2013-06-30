@@ -35,9 +35,6 @@ int main(int argc, char **argv) {
   loop = true;
   SDL_EnableKeyRepeat(10, 10);
   bool leftClick = false;
-  //math::Quat foo(math::Vec3<float>(0.f, 0.f, -1.f), 0.f);
-  //foo.normalize();
-  //freefly.orientation(foo);
   for (auto time = 0.f; time <= synth.length() && loop; time = synth.cursor()) {
 #ifdef SKY_DEBUG /* freefly management */
     SDL_Event event;

@@ -13,12 +13,15 @@
 #include <sync/parts_fsm.hpp>
 #include <tech/framebuffer_copy.hpp>
 #include <tech/post_process.hpp>
+#include <tech/deferred_renderer.hpp>
 
 class CubeRoom : public sky::sync::FinalPartState {
   /* common */
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
   sky::scene::Freefly const &_freefly;
+  sky::tech::DeferredRenderer _drenderer;
+  sky::core::Texture _depthmap, _normalmap, _materialmap;
 
   /* laser */
   sky::core::VertexArray _laser;
