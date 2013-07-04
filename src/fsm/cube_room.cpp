@@ -64,6 +64,13 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
 CubeRoom::~CubeRoom() {
 }
 
+void CubeRoom::_init_materials() {
+#if 0
+  _matPlastic = _drenderer.matmgr.register_material(
+"");
+#endif
+}
+
 /* =========
  * [ Laser ]
  * ========= */

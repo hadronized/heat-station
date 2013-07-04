@@ -22,6 +22,9 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::scene::Freefly const &_freefly;
   sky::tech::DeferredRenderer _drenderer;
   sky::core::Texture _depthmap, _normalmap, _materialmap;
+  sky::scene::Material _matPlastic;
+
+  void _init_materials(void);
 
   /* laser */
   sky::core::VertexArray _laser;
