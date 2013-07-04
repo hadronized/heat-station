@@ -13,7 +13,8 @@ OBJ           = \
 								\
 								fsm.cube_room.o\
 								fsm.init.o\
-								fsm.slab.o
+								fsm.slab.o\
+								fsm.liquid.o
 
 .PHONY: all, clean, mrproper
 

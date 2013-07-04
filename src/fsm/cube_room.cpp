@@ -25,11 +25,11 @@ namespace {
   float  const SLAB_SIZE        = 1.f;
   float  const SLAB_THICKNESS   = 0.5f;
   uint   const SLAB_INSTANCES   = 600;
-  ushort const WATER_WIDTH      = 10;
-  ushort const WATER_HEIGHT     = 10;
-  ushort const WATER_TWIDTH     = 80;
-  ushort const WATER_THEIGHT    = 80;
-  ushort const WATER_RES        = WATER_TWIDTH * WATER_THEIGHT;
+  ushort const LIQUID_WIDTH      = 10;
+  ushort const LIQUID_HEIGHT     = 10;
+  ushort const LIQUID_TWIDTH     = 80;
+  ushort const LIQUID_THEIGHT    = 80;
+  ushort const LIQUID_RES        = LIQUID_TWIDTH * LIQUID_THEIGHT;
 }
 
 /* ============
@@ -46,18 +46,15 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
   , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
+    /* slab */
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
-    /* water */
-  , _water(WATER_WIDTH, WATER_HEIGHT, WATER_TWIDTH, WATER_THEIGHT) {
+    /* liquid */
+  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT) {
   /* laser */
   _init_laser_program(width, height);
   _laser.bind();
   _laser.unbind();
   _init_laser_texture(width, height);
-
-  /* water */
-  _init_water_program();
-  _init_water();
 }
 
 CubeRoom::~CubeRoom() {
@@ -224,50 +221,6 @@ void CubeRoom::_render_laser(float time, Mat44 const &proj, Mat44 const &view) c
   _fbCopier.copy(_laserBlurOfftex[0]);
 }
 
-/* =========
- * [ Water ]
- * ========= */
-void CubeRoom::_init_water_program() {
-  Shader vs(Shader::VERTEX);
-  Shader fs(Shader::FRAGMENT);
-
-  vs.source(from_file("../../src/fsm/water-vs.glsl").c_str());
-  vs.compile("water vertex shader");
-  fs.source(from_file("../../src/fsm/water-fs.glsl").c_str());
-  fs.compile("water fragment shader");
-
-  _waterSP.attach(vs);
-  _waterSP.attach(fs);
-  _waterSP.link();
-
-  _init_water_uniforms();
-}
-
-void CubeRoom::_init_water_uniforms() {
-  /* uniforms */
-  _waterProjIndex = _waterSP.map_uniform("proj");
-  _waterViewIndex = _waterSP.map_uniform("view");
-  _waterTimeIndex = _waterSP.map_uniform("time");
-}
-
-void CubeRoom::_init_water() {
-#if 0
-  _water.start();
-  auto fovy = _water.program().map_uniform("fovy");
-  fovy.push(FOVY);
-  _water.end();
-#endif
-}
-
-void CubeRoom::_render_water(float time, Mat44 const &proj, Mat44 const &view) const {
-  _waterSP.use();
-  _waterProjIndex.push(proj);
-  _waterViewIndex.push(view);
-  _waterTimeIndex.push(time);
-  _water.va.indexed_render(primitive::TRIANGLE, WATER_RES*6, GLT_UINT);
-  _waterSP.unuse();
-}
-
 /* ============
  * [ CubeRoom ]
  * ============ */
@@ -284,10 +237,10 @@ void CubeRoom::run(float time) const {
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _slab.render(time, proj, view, SLAB_INSTANCES);
 
-  /* water */
+  /* liquid */
   //state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::DST_ALPHA);
-  _render_water(time, proj, view);
+  _liquid.render(time, proj, view, LIQUID_RES);
 
   /* laser */
   state::enable(state::BLENDING);

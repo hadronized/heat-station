@@ -1,6 +1,7 @@
 #ifndef __FSM_CUBE_ROOM_HPP
 #define __FSM_CUBE_ROOM_HPP
 
+#include <fsm/liquid.hpp>
 #include <fsm/slab.hpp>
 
 #include <core/buffer.hpp>
@@ -59,16 +60,8 @@ class CubeRoom : public sky::sync::FinalPartState {
   /* room */
   Slab _slab;
 
-  /* water */
-  sky::core::Program _waterSP;
-  void _init_water_program(void);
-  sky::core::Program::Uniform _waterProjIndex;
-  sky::core::Program::Uniform _waterViewIndex;
-  sky::core::Program::Uniform _waterTimeIndex;
-  void _init_water_uniforms(void);
-  sky::data::SubPlane _water;
-  void _init_water(void);
-  void _render_water(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
+  /* liquid */
+  Liquid _liquid;
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);
