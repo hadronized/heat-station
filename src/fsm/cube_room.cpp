@@ -16,9 +16,9 @@ using namespace scene;
 using namespace tech;
 
 namespace {
-  float  const FOVY             = PI*70.f/180.f; /* 90 degrees */
-  float  const ZNEAR            = 0.001f;
-  float  const ZFAR             = 100.f;
+  float  const FOVY             = PI*90.f/180.f; /* 90 degrees */
+  float  const ZNEAR            = 0.01f;
+  float  const ZFAR             = 10.f;
   ushort const LASER_TESS_LEVEL = 13;
   float  const LASER_HHEIGHT    = 0.15;
   ushort const BLUR_PASSES      = 3;
@@ -63,25 +63,13 @@ void CubeRoom::_init_materials() {
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = _freefly.view();
+  auto const &view = _freefly.view();
 
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);
 
-  /* walls */
-  state::enable(state::DEPTH_TEST);
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _slab.render(time, proj, view, SLAB_INSTANCES);
-
-  /* liquid */
-  //state::enable(state::BLENDING);
-  Framebuffer::blend_func(blending::ONE, blending::DST_ALPHA);
   _liquid.render(time, proj, view, LIQUID_RES);
-
-  /* laser */
-  state::enable(state::BLENDING);
-  Framebuffer::blend_func(blending::ONE, blending::ONE);
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
-  state::disable(state::BLENDING);
 }
 

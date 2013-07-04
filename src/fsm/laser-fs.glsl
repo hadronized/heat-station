@@ -6,5 +6,6 @@ out vec4 frag;
 uniform sampler2D lasertex;
 
 void main() {
-  frag = texture2D(lasertex, gUV);
+  //frag = texture2D(lasertex, gUV);
+  frag = vec4(1.);
 }

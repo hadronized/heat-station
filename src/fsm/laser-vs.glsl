@@ -1,6 +1,7 @@
 #version 330 core
 
 out vec3 vCo;
+
 uniform vec2 vnb; /* vertices nb; 1 / vertices nb */
 uniform float t;
 
