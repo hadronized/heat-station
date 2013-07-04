@@ -32,9 +32,6 @@ namespace {
   ushort const LIQUID_RES        = LIQUID_TWIDTH * LIQUID_THEIGHT;
 }
 
-/* ============
- * [ CubeRoom ]
- * ============ */
 CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
     /* common */
     _width(width)
@@ -42,8 +39,8 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _fbCopier(width, height)
   , _freefly(freefly)
   , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
-  , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
-  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
+//  , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
+//  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
 }
 
@@ -57,9 +54,6 @@ void CubeRoom::_init_materials() {
 #endif
 }
 
-/* ============
- * [ CubeRoom ]
- * ============ */
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
@@ -68,8 +62,8 @@ void CubeRoom::run(float time) const {
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);
 
-  _slab.render(time, proj, view, SLAB_INSTANCES);
-  _liquid.render(time, proj, view, LIQUID_RES);
+  //_slab.render(time, proj, view, SLAB_INSTANCES);
+  //_liquid.render(time, proj, view, LIQUID_RES);
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
 }
 
