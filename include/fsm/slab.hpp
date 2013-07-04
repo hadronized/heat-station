@@ -21,7 +21,7 @@ class Slab {
   void _init_uniforms(float size, float thickness);
 
 public :
-  Slab(float size, float thickness);
+  Slab(uint width, uint height, float size, float thickness);
   ~Slab(void) = default;
 
   void render(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view, sky::uint n) const;

@@ -1,6 +1,8 @@
 #ifndef __FSM_CUBE_ROOM_HPP
 #define __FSM_CUBE_ROOM_HPP
 
+#include <fsm/slab.hpp>
+
 #include <core/buffer.hpp>
 #include <core/framebuffer.hpp>
 #include <core/renderbuffer.hpp>
@@ -55,19 +57,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _render_laser(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
 
   /* room */
-  sky::core::VertexArray _slab;
-  sky::core::Buffer _slabIBO;
-  sky::core::Program _slabSP;
-  sky::core::Program::Uniform _slabProjIndex;
-  sky::core::Program::Uniform _slabViewIndex;
-  sky::core::Program::Uniform _slabSizeIndex;
-  sky::core::Program::Uniform _slabThicknessIndex;
-  void _init_room(void);
-  void _init_room_program(sky::ushort width, sky::ushort height);
-  void _init_room_uniforms(sky::ushort width, sky::ushort height);
-  sky::core::Texture _slabTexture;
-  void _init_room_texture(sky::ushort width, sky::ushort height);
-  void _render_room(float time, sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
+  Slab _slab;
 
   /* water */
   sky::core::Program _waterSP;

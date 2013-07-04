@@ -33,7 +33,12 @@ namespace {
   };
 }
 
-Slab::Slab(float size, float thickness) {
+Slab::Slab(uint width, uint height, float size, float thickness) {
+  _init_ibo();
+  _init_va();
+  _init_texture(width, height);
+  _init_program();
+  _init_uniforms(size, thickness);
 }
 
 void Slab::_init_ibo() {

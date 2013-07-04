@@ -22,6 +22,9 @@ namespace {
   ushort const TESS_LASER_LEVEL = 13;
   ushort const BLUR_PASSES      = 3;
   float  const LASER_HHEIGHT    = 0.15;
+  float  const SLAB_SIZE        = 1.f;
+  float  const SLAB_THICKNESS   = 0.5f;
+  uint   const SLAB_INSTANCES   = 600;
   ushort const WATER_WIDTH      = 10;
   ushort const WATER_HEIGHT     = 10;
   ushort const WATER_TWIDTH     = 80;
@@ -43,6 +46,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
   , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
   , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
+  , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
     /* water */
   , _water(WATER_WIDTH, WATER_HEIGHT, WATER_TWIDTH, WATER_THEIGHT) {
   /* laser */
@@ -50,11 +54,6 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   _laser.bind();
   _laser.unbind();
   _init_laser_texture(width, height);
-
-  /* room */
-  _init_room();
-  _init_room_program(width, height);
-  _init_room_texture(256, 256);
 
   /* water */
   _init_water_program();
@@ -225,121 +224,6 @@ void CubeRoom::_render_laser(float time, Mat44 const &proj, Mat44 const &view) c
   _fbCopier.copy(_laserBlurOfftex[0]);
 }
 
-/* ========
- * [ Room ]
- * ======== */
-void CubeRoom::_init_room() {
-  uint const ids[] = {
-    /* front face */
-      0, 1, 2
-    , 0, 2, 3
-    /* back face */
-    , 4, 5, 6
-    , 4, 6, 7
-    /* up face */
-    , 0, 1, 4 
-    , 1, 4, 5
-    /* bottom face */
-    , 2, 3, 7
-    , 2, 7, 6
-    /* left face */
-    , 1, 2, 5
-    , 2, 5, 6
-    /* right face */
-    , 0, 3, 4
-    , 3, 4, 7
-  };
-
-  /* IBO */
-  gBH.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
-  gBH.data(sizeof(uint)*36, Buffer::STATIC_DRAW, ids);
-  gBH.unbind();
-
-  /* VA */
-  _slab.bind();
-  gBH.bind(Buffer::ELEMENT_ARRAY, _slabIBO);
-  _slab.unbind(); /* attribute-less render */
-  gBH.unbind();
-}
-
-void CubeRoom::_init_room_program(ushort width, ushort height) {
-  Shader vs(Shader::VERTEX);
-  Shader gs(Shader::GEOMETRY);
-  Shader fs(Shader::FRAGMENT);
-
-  vs.source(from_file("../../src/fsm/room-vs.glsl").c_str());
-  vs.compile("room vertex shader");
-  gs.source(from_file("../../src/fsm/room-gs.glsl").c_str());
-  gs.compile("room geometry shader");
-  fs.source(from_file("../../src/fsm/room-fs.glsl").c_str());
-  fs.compile("room fragment shader");
-
-  _slabSP.attach(vs);
-  _slabSP.attach(gs);
-  _slabSP.attach(fs);
-  _slabSP.link();
-
-  _init_room_uniforms(width, height);
-}
-
-void CubeRoom::_init_room_uniforms(ushort width, ushort height) {
-  _slabProjIndex      = _slabSP.map_uniform("proj");
-  _slabViewIndex      = _slabSP.map_uniform("view");
-  _slabSizeIndex      = _slabSP.map_uniform("size");
-  _slabThicknessIndex = _slabSP.map_uniform("thickness");
-}
-
-void CubeRoom::_init_room_texture(ushort width, ushort height) {
-  Framebuffer fb;
-  Renderbuffer rb;
-  PostProcess generator("slab texture generator", from_file("../../src/fsm/slab_texgen-fs.glsl").c_str(), width, height);
-
-  gRBH.bind(Renderbuffer::RENDERBUFFER, rb);
-  gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT);
-  gRBH.unbind();
-
-  gTH1.bind(Texture::T_2D, _slabTexture);
-  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  gTH1.unbind();
-
-  gFBH.bind(Framebuffer::DRAW, fb);
-  gFBH.attach_2D_texture(_slabTexture, Framebuffer::COLOR_ATTACHMENT);
-  gFBH.attach_renderbuffer(rb, Framebuffer::DEPTH_ATTACHMENT);
-
-  /* make the texture */
-  generator.start();
-  generator.apply(0.f);
-  generator.end();
-
-  gFBH.unbind();
-}
-
-void CubeRoom::_render_room(float time, Mat44 const &proj, Mat44 const &view) const {
-  _slabSP.use();
-  
-  /* move camera around */
-  _slabProjIndex.push(proj);
-  _slabViewIndex.push(view);
-
-  /* push size and thickness */
-  _slabSizeIndex.push(1.f);
-  _slabThicknessIndex.push(1.f);
-  
-  /* render walls */
-  /* bind slab texture */
-  gTH1.bind(Texture::T_2D, _slabTexture);
-  _slab.bind();
-  _slab.inst_indexed_render(primitive::TRIANGLE, 36, GLT_UINT, 600);
-  _slab.unbind();
-  gTH1.unbind();
-  
-  _slabSP.unuse();
-}
-
 /* =========
  * [ Water ]
  * ========= */
@@ -398,7 +282,7 @@ void CubeRoom::run(float time) const {
   /* walls */
   state::enable(state::DEPTH_TEST);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  _render_room(time, proj, view);
+  _slab.render(time, proj, view, SLAB_INSTANCES);
 
   /* water */
   //state::enable(state::BLENDING);
