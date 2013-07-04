@@ -19,9 +19,9 @@ namespace {
   float  const FOVY             = PI*70.f/180.f; /* 90 degrees */
   float  const ZNEAR            = 0.001f;
   float  const ZFAR             = 100.f;
-  ushort const TESS_LASER_LEVEL = 13;
-  ushort const BLUR_PASSES      = 3;
+  ushort const LASER_TESS_LEVEL = 13;
   float  const LASER_HHEIGHT    = 0.15;
+  ushort const BLUR_PASSES      = 3;
   float  const SLAB_SIZE        = 1.f;
   float  const SLAB_THICKNESS   = 0.5f;
   uint   const SLAB_INSTANCES   = 600;
@@ -42,19 +42,9 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _fbCopier(width, height)
   , _freefly(freefly)
   , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
-    /* laser blur */
-  , _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
-  , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
-  , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
-    /* slab */
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
-    /* liquid */
-  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT) {
-  /* laser */
-  _init_laser_program(width, height);
-  _laser.bind();
-  _laser.unbind();
-  _init_laser_texture(width, height);
+  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
+  , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
 }
 
 CubeRoom::~CubeRoom() {
@@ -65,160 +55,6 @@ void CubeRoom::_init_materials() {
   _matPlastic = _drenderer.matmgr.register_material(
 "");
 #endif
-}
-
-/* =========
- * [ Laser ]
- * ========= */
-void CubeRoom::_init_laser_program(ushort width, ushort height) {
-  Shader vs(Shader::VERTEX);
-  Shader gs(Shader::GEOMETRY);
-  Shader fs(Shader::FRAGMENT);
-
-  /* sources compilation */
-  vs.source(from_file("../../src/fsm/laser-vs.glsl").c_str());
-  vs.compile("laser VS");
-  gs.source(from_file("../../src/fsm/laser-gs.glsl").c_str());
-  gs.compile("laser GS");
-  fs.source(from_file("../../src/fsm/laser-fs.glsl").c_str());
-  fs.compile("laser FS");
-
-  /* program link */
-  _laserSP.attach(vs);
-  _laserSP.attach(gs);
-  _laserSP.attach(fs);
-  _laserSP.link();
-
-  _init_laser_uniforms(width, height);
-  _init_laser_blur(width, height); 
-}
-
-void CubeRoom::_init_laser_uniforms(ushort width, ushort height) {
-  auto vnbIndex     = _laserSP.map_uniform("vnb");
-  auto hheightIndex = _laserSP.map_uniform("hheight");
-  auto laserTex     = _laserSP.map_uniform("lasertex");
-  _laserProjIndex   = _laserSP.map_uniform("proj");
-  _laserViewIndex   = _laserSP.map_uniform("view");
-  _laserTimeIndex   = _laserSP.map_uniform("t");
-
-  _laserSP.use();
-
-  vnbIndex.push(1.f * TESS_LASER_LEVEL, 1.f / TESS_LASER_LEVEL);
-  hheightIndex.push(LASER_HHEIGHT);
-  laserTex.push(0);
-
-  _laserSP.unuse();
-}
-
-void CubeRoom::_init_laser_texture(ushort width, ushort height) {
-  Framebuffer fb;
-  Renderbuffer rb;
-  PostProcess generator("laser texture generator", from_file("../../src/fsm/laser_texgen-fs.glsl").c_str(), width, height);
-
-  gRBH.bind(Renderbuffer::RENDERBUFFER, rb);
-  gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT);
-  gRBH.unbind();
-
-  gTH1.bind(Texture::T_2D, _laserTexture);
-  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  gTH1.unbind();
-
-  gFBH.bind(Framebuffer::DRAW, fb);
-  gFBH.attach_2D_texture(_laserTexture, Framebuffer::COLOR_ATTACHMENT);
-  gFBH.attach_renderbuffer(rb, Framebuffer::DEPTH_ATTACHMENT);
-
-  /* make the texture */
-  generator.start();
-  generator.apply(0.f);
-  generator.end();
-
-  gFBH.unbind();
-}
-
-void CubeRoom::_init_laser_blur(ushort width, ushort height) {
-  FramebufferHandler fbh;
-  RenderbufferHandler rbh;
-  TextureHandler<1> texh;
-
-  rbh.bind(Renderbuffer::RENDERBUFFER, _laserBlurRB);
-  rbh.store(width, height, Texture::IF_DEPTH_COMPONENT);
-  rbh.unbind();
-
-  for (int i = 0; i < 2; ++i) {
-    texh.bind(Texture::T_2D, _laserBlurOfftex[i]);
-    texh.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_BORDER);
-    texh.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_BORDER);
-    texh.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-    texh.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-    texh.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-    texh.unbind();
-
-    fbh.bind(Framebuffer::DRAW, _laserBlurFB[i]);
-    fbh.attach_renderbuffer(_laserBlurRB, Framebuffer::DEPTH_ATTACHMENT);
-    fbh.attach_2D_texture(_laserBlurOfftex[i], Framebuffer::COLOR_ATTACHMENT);
-  }
-}
-
-void CubeRoom::_render_laser(float time, Mat44 const &proj, Mat44 const &view) const {
-  static FramebufferHandler fbh;
-  static TextureHandler<1> texh;
-  int offtexid = 0;
- 
-  /* first, render the lined laser into a framebuffer */
-  _laserSP.use();
-
-  _laserProjIndex.push(proj);
-  _laserViewIndex.push(view);
-
-  _laserTimeIndex.push(time);
-  fbh.bind(Framebuffer::DRAW, _laserBlurFB[0]);
-  texh.bind(Texture::T_2D, _laserTexture);
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  state::disable(state::DEPTH_TEST);
-  _laser.render(primitive::LINE_STRIP, 0, TESS_LASER_LEVEL+1);
-  texh.unbind();
-  fbh.unbind();
-  _laserSP.unuse();
-
-  /* then, blur the lined laser */
-  for (int i = 0; i < BLUR_PASSES; ++i) {
-    /* first hblur */
-    texh.bind(Texture::T_2D, _laserBlurOfftex[0]);
-    fbh.bind(Framebuffer::DRAW, _laserBlurFB[1]);
-    state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-    _laserHBlur.start();
-    _laserHBlur.apply(0.);
-    _laserHBlur.end();
-    /* then vblur */
-    texh.bind(Texture::T_2D, _laserBlurOfftex[1]);
-    fbh.bind(Framebuffer::DRAW, _laserBlurFB[0]);
-    state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-    _laserVBlur.start();
-    _laserVBlur.apply(0.);
-    _laserVBlur.end();
-  }
-  fbh.unbind();
-  texh.unbind();
-
-  /* add a moving effect on the blurred area
-   * hint: the final blurred framebuffer id is 0 */
-#if 0
-  fbh.bind(Framebuffer::DRAW, _laserBlurFB[1]);
-  texh.bind(Texture::T_2D, _laserBlurOfftex[0]);
-  _laserMove.start();
-  _laserMove.apply(time);
-  _laserMove.end();
-  fbh.unbind();
-#endif
-
-  /* then render the extremity with billboards */
-  
-  /* combine the blurred lined moving laser and billboards */
-  _fbCopier.copy(_laserBlurOfftex[0]);
 }
 
 /* ============
@@ -245,7 +81,7 @@ void CubeRoom::run(float time) const {
   /* laser */
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);
-  _render_laser(time, proj, view);
+  _laser.render(time, proj, view, LASER_TESS_LEVEL);
   state::disable(state::BLENDING);
 }
 
