@@ -30,8 +30,8 @@ class CubeRoom : public sky::sync::FinalPartState {
 
   void _init_materials(void);
 
-  //Slab _slab;
-  //Liquid _liquid;
+  Slab _slab;
+  Liquid _liquid;
   Laser _laser;
 
 public :

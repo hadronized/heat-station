@@ -16,11 +16,11 @@ using namespace scene;
 using namespace tech;
 
 namespace {
-  float  const FOVY             = PI*90.f/180.f; /* 90 degrees */
-  float  const ZNEAR            = 0.01f;
-  float  const ZFAR             = 10.f;
+  float  const FOVY             = PI*70.f/180.f; /* 90 degrees */
+  float  const ZNEAR            = 0.0001f;
+  float  const ZFAR             = 100.f;
   ushort const LASER_TESS_LEVEL = 13;
-  float  const LASER_HHEIGHT    = 0.15;
+  float  const LASER_HHEIGHT    = 0.15f;
   ushort const BLUR_PASSES      = 3;
   float  const SLAB_SIZE        = 1.f;
   float  const SLAB_THICKNESS   = 0.5f;
@@ -39,8 +39,8 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _fbCopier(width, height)
   , _freefly(freefly)
   , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
-//  , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
-//  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
+  , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
+  , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
 }
 
@@ -62,8 +62,8 @@ void CubeRoom::run(float time) const {
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);
 
-  //_slab.render(time, proj, view, SLAB_INSTANCES);
-  //_liquid.render(time, proj, view, LIQUID_RES);
+  _slab.render(time, proj, view, SLAB_INSTANCES);
+  _liquid.render(time, proj, view, LIQUID_RES);
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
 }
 
