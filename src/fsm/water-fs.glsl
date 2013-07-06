@@ -3,14 +3,17 @@
 in vec3 vco;
 in vec3 vno;
 
-out vec4 frag;
-
 uniform mat4 view;
+
+layout (location = 0) out vec3 nofrag;
+layout (location = 1) out vec2 matfrag;
 
 void main() {
   vec3 eye = inverse(view)[3].xyz;
   float faceid = float(gl_PrimitiveID / 2);
+  /*
   frag = vec4(1. - sin(faceid), cos(faceid), 0., 1.);
+  */
 
   /* laser phong */
   vec4 laserDiffuse  = vec4(0.75, 0., 0., 1.);
@@ -25,7 +28,12 @@ void main() {
   float waterDiffuse = max(0., dot(nldir, vno));
   float waterSpecular = pow(max(0., dot(reflect(normalize(vco-eye), vno), nldir)), 10.);
 
+#if 0
   frag =  liquidDiffuse * waterDiffuse / (log(laserDist)*2.5);
   frag += laserDiffuse  * waterDiffuse / (pow(laserDist, 4.)*0.1);
   frag += laserDiffuse  * waterSpecular;
+#endif
+  
+  nofrag    = vno;
+  matfrag   = vec2(1, 1);
 }

@@ -5,7 +5,8 @@ uniform mat4 view;
 in vec3 gco; /* vertex shader space coordinates */
 in vec3 gno; /* vertex shader normal */
 
-out vec4 frag;
+layout (location = 0) out vec3 nofrag;
+layout (location = 1) out vec2 matfrag;
 
 void main() {
   vec3 eye  = inverse(view)[3].xyz; /* camera position */
@@ -14,6 +15,11 @@ void main() {
   float laserDist = length(lvco);
   float diffuse = max(0., dot(gno, ldir));
 
+  /*
   frag = vec4(0.6) * diffuse / (log(laserDist)*2.5);
   frag += vec4(0.75, 0., 0., 1.) * diffuse / (pow(laserDist, 4.) * 0.1);
+  */
+
+  nofrag = gno;
+  matfrag = vec2(1., 0.);
 }

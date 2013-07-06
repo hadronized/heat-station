@@ -7,7 +7,6 @@
 
 #include <core/buffer.hpp>
 #include <core/framebuffer.hpp>
-#include <core/renderbuffer.hpp>
 #include <core/shader.hpp>
 #include <core/texture.hpp>
 #include <core/vertex_array.hpp>
@@ -24,15 +23,23 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
   sky::scene::Freefly const &_freefly;
-  sky::tech::DeferredRenderer _drenderer;
   sky::core::Texture _depthmap, _normalmap, _materialmap;
+  sky::tech::DeferredRenderer _drenderer;
   sky::scene::Material _matPlastic;
-
-  void _init_materials(void);
+  sky::core::Framebuffer _fb;
 
   Slab _slab;
   Liquid _liquid;
   Laser _laser;
+
+  sky::tech::PostProcess _viewer;
+
+  void _bind(void) const;
+  void _unbind(void) const;
+  void _init_textures(sky::ushort width, sky::ushort height);
+  void _init_framebuffer(void);
+  void _init_offscreen(sky::ushort width, sky::ushort height);
+  void _init_materials(void);
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);

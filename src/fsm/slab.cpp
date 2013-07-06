@@ -113,8 +113,6 @@ void Slab::_init_uniforms(float size, float thickness) {
   _sp.unuse();
 }
 
-
-
 void Slab::render(float time, Mat44 const &proj, Mat44 const &view, uint n) const {
   state::enable(state::DEPTH_TEST);
 
@@ -125,7 +123,6 @@ void Slab::render(float time, Mat44 const &proj, Mat44 const &view, uint n) cons
 
   gTH1.bind(Texture::T_2D, _texture);
   _va.bind();
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _va.inst_indexed_render(primitive::TRIANGLE, 36, GLT_UINT, n);
   _va.unbind();
   gTH1.unbind();
