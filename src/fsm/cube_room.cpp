@@ -66,14 +66,6 @@ void CubeRoom::_init_materials() {
 #endif
 }
 
-void CubeRoom::_bind() const {
-  gFBH.bind(Framebuffer::DRAW, _fb);
-}
-
-void CubeRoom::_unbind() const {
-  gFBH.unbind();
-}
-
 void CubeRoom::run(float time) const {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);

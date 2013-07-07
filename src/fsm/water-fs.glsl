@@ -6,7 +6,7 @@ in vec3 vno;
 uniform mat4 view;
 
 layout (location = 0) out vec3 nofrag;
-layout (location = 1) out vec2 matfrag;
+layout (location = 1) out uvec2 matfrag;
 
 void main() {
   vec3 eye = inverse(view)[3].xyz;
@@ -35,5 +35,5 @@ void main() {
 #endif
   
   nofrag    = vno;
-  matfrag   = vec2(1, 1);
+  matfrag   = uvec2(1, 1);
 }

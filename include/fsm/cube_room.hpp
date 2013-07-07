@@ -26,19 +26,12 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Texture _depthmap, _normalmap, _materialmap;
   sky::tech::DeferredRenderer _drenderer;
   sky::scene::Material _matPlastic;
-  sky::core::Framebuffer _fb;
+  sky::tech::PostProcess _viewer;
 
   Slab _slab;
   Liquid _liquid;
   Laser _laser;
 
-  sky::tech::PostProcess _viewer;
-
-  void _bind(void) const;
-  void _unbind(void) const;
-  void _init_textures(sky::ushort width, sky::ushort height);
-  void _init_framebuffer(void);
-  void _init_offscreen(sky::ushort width, sky::ushort height);
   void _init_materials(void);
 
 public :
