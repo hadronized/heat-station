@@ -48,22 +48,33 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _height(height)
   , _fbCopier(width, height)
   , _freefly(freefly)
+  , _laserLight(
+        Light::AmbientColor(0.6f, 0.6f, 0.6f)
+      , Light::DiffuseColor(0.75f, 0.f, 0.f)
+      , Light::SpecularColor(0.75f, 0.f, 0.f)
+      , 10.f
+      , 1.f
+      , 1.f
+      , 1.f
+      )
   , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT)
   , _viewer("DR viewer", VIEWER_FS_SRC, width, height) {
-  _init_materials();
+  _init_materials(width, height);
 }
 
 CubeRoom::~CubeRoom() {
 }
 
-void CubeRoom::_init_materials() {
-#if 0
+void CubeRoom::_init_materials(ushort width, ushort height) {
   _matPlastic = _drenderer.matmgr.register_material(
-"");
-#endif
+"frag = texture(normalmap, gl_FragCoord.xy*res.zw);");
+  _drenderer.matmgr.register_material(
+"frag = texture(depthmap, gl_FragCoord.xy*res.zw);");
+
+  _drenderer.matmgr.commit_materials(width, height);
 }
 
 void CubeRoom::run(float time) const {
@@ -74,27 +85,24 @@ void CubeRoom::run(float time) const {
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);
 
-  _drenderer.start();
+  _drenderer.start_geometry();
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _slab.render(time, proj, view, SLAB_INSTANCES);
   _liquid.render(time, proj, view, LIQUID_RES);
-  _drenderer.end();
+  _drenderer.end_geometry();
 
+  _drenderer.start_shading();
+  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+  _drenderer.shade(_laserLight);
+  _drenderer.end_shading();
 #if 0
-  _bind();
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-
-  _slab.render(time, proj, view, SLAB_INSTANCES);
-  _liquid.render(time, proj, view, LIQUID_RES);
-  _unbind();
-#endif
-
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _viewer.start();
   gTH1.bind(Texture::T_2D, _materialmap);
   _viewer.apply(0.f);
   gTH1.unbind();
   _viewer.end();
+#endif
   //_slab.render(time, proj, view, SLAB_INSTANCES);
   //_liquid.render(time, proj, view, LIQUID_RES);
   //_laser.render(time, proj, view, LASER_TESS_LEVEL);

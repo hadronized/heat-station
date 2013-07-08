@@ -21,5 +21,5 @@ void main() {
   */
 
   nofrag = gno;
-  matfrag = uvec2(1, 0);
+  matfrag = uvec2(2, 0);
 }

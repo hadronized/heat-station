@@ -23,16 +23,18 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
   sky::scene::Freefly const &_freefly;
+  sky::scene::Light _laserLight;
   sky::core::Texture _depthmap, _normalmap, _materialmap;
   sky::tech::DeferredRenderer _drenderer;
   sky::scene::Material _matPlastic;
-  sky::tech::PostProcess _viewer;
 
   Slab _slab;
   Liquid _liquid;
   Laser _laser;
 
-  void _init_materials(void);
+  sky::tech::PostProcess _viewer;
+
+  void _init_materials(ushort width, ushort height);
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);
