@@ -95,16 +95,7 @@ void CubeRoom::run(float time) const {
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _drenderer.shade(_laserLight);
   _drenderer.end_shading();
-#if 0
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  _viewer.start();
-  gTH1.bind(Texture::T_2D, _materialmap);
-  _viewer.apply(0.f);
-  gTH1.unbind();
-  _viewer.end();
-#endif
-  //_slab.render(time, proj, view, SLAB_INSTANCES);
-  //_liquid.render(time, proj, view, LIQUID_RES);
-  //_laser.render(time, proj, view, LASER_TESS_LEVEL);
+
+  _laser.render(time, proj, view, LASER_TESS_LEVEL);
 }
 
