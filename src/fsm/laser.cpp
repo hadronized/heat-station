@@ -74,13 +74,13 @@ void Laser::_init_texture(ushort width, ushort height) {
   gRBH.store(TEXTURE_WIDTH, TEXTURE_HEIGHT, Texture::IF_DEPTH_COMPONENT);
   gRBH.unbind();
 
-  gTH1.bind(Texture::T_2D, _laserTexture);
-  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  gTH1.image_2D(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  gTH1.unbind();
+  gTH.bind(Texture::T_2D, _laserTexture);
+  gTH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
+  gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
+  gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
+  gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
+  gTH.image_2D(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+  gTH.unbind();
 
   gFBH.bind(Framebuffer::DRAW, fb);
   gFBH.attach_renderbuffer(rb, Framebuffer::DEPTH_ATTACHMENT);
@@ -96,13 +96,13 @@ void Laser::_init_texture(ushort width, ushort height) {
   gRBH.unbind();
 
   for (short i = 0; i < 2; ++i) {
-    gTH1.bind(Texture::T_2D, _offtexture[i]);
-    gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_BORDER);
-    gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_BORDER);
-    gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-    gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-    gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-    gTH1.unbind();
+    gTH.bind(Texture::T_2D, _offtexture[i]);
+    gTH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_BORDER);
+    gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_BORDER);
+    gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
+    gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
+    gTH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+    gTH.unbind();
 
     gFBH.bind(Framebuffer::DRAW, _pingpong[i]);
     gFBH.attach_renderbuffer(_rb, Framebuffer::DEPTH_ATTACHMENT);
@@ -126,11 +126,11 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
   _timeIndex.push(time);
 
   gFBH.bind(Framebuffer::DRAW, _pingpong[0]);
-  gTH1.unit(0);
-  gTH1.bind(Texture::T_2D, _laserTexture);
+  gTH.unit(0);
+  gTH.bind(Texture::T_2D, _laserTexture);
   state::clear(state::COLOR_BUFFER);
   _va.render(primitive::LINE_STRIP, 0, n+1);
-  gTH1.unbind();
+  gTH.unbind();
   gFBH.unbind();
 
   _sp.unuse();

@@ -30,16 +30,6 @@ namespace {
   ushort const LIQUID_TWIDTH    = 80;
   ushort const LIQUID_THEIGHT   = 80;
   ushort const LIQUID_RES       = LIQUID_TWIDTH * LIQUID_THEIGHT;
-  char   const *VIEWER_FS_SRC   =
-    "#version 330 core\n"
-    
-    "out vec4 frag;\n"
-    "uniform vec4 res;\n"
-    "uniform usampler2D srctex;\n"
-
-    "void main() {\n"
-      "frag=texture(srctex,gl_FragCoord.xy*res.zw);"
-    "}";
 }
 
 CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
@@ -48,33 +38,50 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
   , _height(height)
   , _fbCopier(width, height)
   , _freefly(freefly)
-  , _laserLight(
-        Light::AmbientColor(0.6f, 0.6f, 0.6f)
-      , Light::DiffuseColor(0.75f, 0.f, 0.f)
-      , Light::SpecularColor(0.75f, 0.f, 0.f)
-      , 10.f
-      , 1.f
-      , 1.f
-      , 1.f
-      )
   , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
-  , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT)
-  , _viewer("DR viewer", VIEWER_FS_SRC, width, height) {
+  , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
   _init_materials(width, height);
 }
 
-CubeRoom::~CubeRoom() {
-}
-
 void CubeRoom::_init_materials(ushort width, ushort height) {
-  _matPlastic = _drenderer.matmgr.register_material(
-"frag = texture(normalmap, gl_FragCoord.xy*res.zw);");
-  _drenderer.matmgr.register_material(
-"frag = texture(depthmap, gl_FragCoord.xy*res.zw);");
+  char const *matHeader =
+    "uniform mat4 proj;\n"
+    "uniform vec3 lightColor;\n"
+    "uniform vec3 lightPos;\n"
+    
+    "vec2 get_uv() {\n"
+      "return gl_FragCoord.xy*res.zw;\n"
+    "}\n"
+    "vec3 get_co() {\n"
+      "vec2 uv = get_uv();\n"
+      "vec2 ps = 2. * uv - 1.; ps.y *= res.y * res.z;\n"
+      "vec4 p = inverse(proj) * vec4(ps, texture(depthmap, uv).r, 1.);\n"
+      "return (p/p.w).xyz;\n"
+    "}\n"
+    "vec3 get_eye() {\n"
+      "return inverse(proj)[3].xyz;\n"
+    "}\n";
+  _matmgr.register_material(
+    "vec3 no = normalize(texture(normalmap, get_uv()).xyz);\n"
+    "vec3 co = get_co();\n"
+    "vec4 matColor = texture(propmap, get_uv());\n"
+    "matColor = vec4(1.);\n"
+    "vec3 ldir = lightPos - co;\n"
+    "vec3 nldir = normalize(ldir);\n"
+    "vec3 eyedir = normalize(get_eye() - co);\n"
+    "float diffk = max(0., dot(nldir, no));\n"
+    "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n"
+    
+    "return (matColor * speck + vec4(lightColor, 1.)) * diffk;\n"
+  , _matPlastic);
 
-  _drenderer.matmgr.commit_materials(width, height);
+  _matmgr.commit_materials(width, height, matHeader);
+  
+  _matmgrProjIndex   = _matmgr.postprocess().program().map_uniform("proj");
+  _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
+  _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
 }
 
 void CubeRoom::run(float time) const {
@@ -91,11 +98,19 @@ void CubeRoom::run(float time) const {
   _liquid.render(time, proj, view, LIQUID_RES);
   _drenderer.end_geometry();
 
-  _drenderer.start_shading();
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  _drenderer.shade(_laserLight);
+
+  _drenderer.start_shading();
+  _matmgr.start();
+
+  _matmgrProjIndex.push(proj);
+  _matmgrLColorIndex.push(0.75f, 0.f, 0.f);
+  _matmgrLPosIndex.push(0.f, 0.f, 0.f);
+  _matmgr.render();
+
+  _matmgr.end();
   _drenderer.end_shading();
 
-  _laser.render(time, proj, view, LASER_TESS_LEVEL);
+  //_laser.render(time, proj, view, LASER_TESS_LEVEL);
 }
 

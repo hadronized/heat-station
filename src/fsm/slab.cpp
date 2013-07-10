@@ -63,13 +63,13 @@ void Slab::_init_texture(uint width, uint height) {
   gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT);
   gRBH.unbind();
 
-  gTH1.bind(Texture::T_2D, _texture);
-  gTH1.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
-  gTH1.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
-  gTH1.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  gTH1.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
-  gTH1.unbind();
+  gTH.bind(Texture::T_2D, _texture);
+  gTH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP_TO_EDGE);
+  gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
+  gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
+  gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
+  gTH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+  gTH.unbind();
 
   gFBH.bind(Framebuffer::DRAW, fb);
   gFBH.attach_2D_texture(_texture, Framebuffer::COLOR_ATTACHMENT);
@@ -121,11 +121,11 @@ void Slab::render(float time, Mat44 const &proj, Mat44 const &view, uint n) cons
   _projIndex.push(proj);
   _viewIndex.push(view);
 
-  gTH1.bind(Texture::T_2D, _texture);
+  gTH.bind(Texture::T_2D, _texture);
   _va.bind();
   _va.inst_indexed_render(primitive::TRIANGLE, 36, GLT_UINT, n);
   _va.unbind();
-  gTH1.unbind();
+  gTH.unbind();
 
   _sp.unuse();
 }
