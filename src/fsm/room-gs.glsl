@@ -32,7 +32,7 @@ void main() {
     gno = vec3(1., 0., 0.);
   }
   if ((faceID & 1) == 1) {
-    gno = -gno;
+    //gno = -gno;
   }
 
   /* emit the vertices */

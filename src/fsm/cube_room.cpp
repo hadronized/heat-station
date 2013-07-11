@@ -48,6 +48,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
 void CubeRoom::_init_materials(ushort width, ushort height) {
   char const *matHeader =
     "uniform mat4 proj;\n"
+    "uniform mat4 view;\n"
     "uniform vec3 lightColor;\n"
     "uniform vec3 lightPos;\n"
     
@@ -56,9 +57,8 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "}\n"
     "vec3 get_co() {\n"
       "vec2 uv = get_uv();\n"
-      "vec2 ps = 2. * uv - 1.; ps.y *= res.y * res.z;\n"
-      "vec4 p = inverse(proj) * vec4(ps, texture(depthmap, uv).r, 1.);\n"
-      "return (p/p.w).xyz;\n"
+      "vec4 p = inverse(proj * view) * vec4(2. * vec3(uv, texture(depthmap, uv).r) - 1., 1.);\n"
+      "return p.xyz/p.w;\n"
     "}\n"
     "vec3 get_eye() {\n"
       "return inverse(proj)[3].xyz;\n"
@@ -68,18 +68,19 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "vec3 co = get_co();\n"
     "vec4 matColor = texture(propmap, get_uv());\n"
     "matColor = vec4(1.);\n"
-    "vec3 ldir = lightPos - co;\n"
+    "vec3 ldir = vec3((lightPos - co).xy, 0.);\n"
     "vec3 nldir = normalize(ldir);\n"
     "vec3 eyedir = normalize(get_eye() - co);\n"
     "float diffk = max(0., dot(nldir, no));\n"
     "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n"
     
-    "return (matColor * speck + vec4(lightColor, 1.)) * diffk;\n"
+    "return vec4(diffk);\n"
   , _matPlastic);
 
   _matmgr.commit_materials(width, height, matHeader);
   
   _matmgrProjIndex   = _matmgr.postprocess().program().map_uniform("proj");
+  _matmgrViewIndex   = _matmgr.postprocess().program().map_uniform("view");
   _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
 }
@@ -104,13 +105,14 @@ void CubeRoom::run(float time) const {
   _matmgr.start();
 
   _matmgrProjIndex.push(proj);
+  _matmgrViewIndex.push(view);
   _matmgrLColorIndex.push(0.75f, 0.f, 0.f);
-  _matmgrLPosIndex.push(0.f, 0.f, 0.f);
+  _matmgrLPosIndex.push(0.f, 10.f, 0.f);
   _matmgr.render();
 
   _matmgr.end();
   _drenderer.end_shading();
 
-  //_laser.render(time, proj, view, LASER_TESS_LEVEL);
+  _laser.render(time, proj, view, LASER_TESS_LEVEL);
 }
 

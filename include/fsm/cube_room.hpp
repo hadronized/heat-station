@@ -27,6 +27,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::tech::DeferredRenderer _drenderer;
   sky::scene::MaterialManager _matmgr;
   sky::core::Program::Uniform _matmgrProjIndex;
+  sky::core::Program::Uniform _matmgrViewIndex;
   sky::core::Program::Uniform _matmgrLColorIndex;
   sky::core::Program::Uniform _matmgrLPosIndex;
   sky::scene::Material _matPlastic;
