@@ -74,6 +74,21 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "float diffk = max(0., dot(nldir, no));\n"
     "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n"
     
+    "if (no == vec3(0., 0., 1.)) {\n"
+      "return vec4(0., 0., 1., 1.);\n"
+    "} else if (no == vec3(0., 0., -1.)) {\n"
+      "return vec4(0., 1., 1., 1.);\n"
+    "} else if (no == vec3(0., 1., 0.)) {\n"
+      "return vec4(0., 1., 0., 1.);\n"
+    "} else if (no == vec3(0., -1., 0.)) {\n"
+      "return vec4(1., 1., 0., 1.);\n"
+    "} else if (no == vec3(1., 0., 0.)) {\n"
+      "return vec4(1., 0., 0., 1.);\n"
+    "} else if (no == vec3(-1., 0., 0.)) {\n"
+      "return vec4(1., 0., 1., 1.);\n"
+    "} else {\n"
+      "return vec4(no, 1.);\n"
+    "}\n"
     "return vec4(diffk);\n"
   , _matPlastic);
 

@@ -31,8 +31,8 @@ void main() {
   } else {
     gno = vec3(1., 0., 0.);
   }
-  if ((faceID & 1) == 1) {
-    //gno = -gno;
+  if ((faceID & 1) == 1) { /* FIXME: trouble here! */
+    gno = -gno.xyz;
   }
 
   /* emit the vertices */
