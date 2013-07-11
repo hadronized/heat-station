@@ -66,7 +66,7 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
   _matmgr.register_material(
     "vec3 no = normalize(texture(normalmap, get_uv()).xyz);\n"
     "vec3 co = get_co();\n"
-    "vec4 matColor = texture(propmap, get_uv());\n"
+    "vec4 matColor;// = texture(propmap, get_uv());\n"
     "matColor = vec4(1.);\n"
     "vec3 ldir = vec3((lightPos - co).xy, 0.);\n"
     "vec3 nldir = normalize(ldir);\n"
@@ -74,22 +74,11 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "float diffk = max(0., dot(nldir, no));\n"
     "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n"
     
-    "if (no == vec3(0., 0., 1.)) {\n"
-      "return vec4(0., 0., 1., 1.);\n"
-    "} else if (no == vec3(0., 0., -1.)) {\n"
-      "return vec4(0., 1., 1., 1.);\n"
-    "} else if (no == vec3(0., 1., 0.)) {\n"
-      "return vec4(0., 1., 0., 1.);\n"
-    "} else if (no == vec3(0., -1., 0.)) {\n"
-      "return vec4(1., 1., 0., 1.);\n"
-    "} else if (no == vec3(1., 0., 0.)) {\n"
-      "return vec4(1., 0., 0., 1.);\n"
-    "} else if (no == vec3(-1., 0., 0.)) {\n"
-      "return vec4(1., 0., 1., 1.);\n"
-    "} else {\n"
-      "return vec4(no, 1.);\n"
-    "}\n"
-    "return vec4(diffk);\n"
+    "vec4 mixedColor = matColor + vec4(lightColor, 1.);\n"
+    "vec4 f = mixedColor * diffk;\n"
+    "f += mixedColor * speck;\n"
+    "f /= pow(length(ldir)*0.5, 4.);\n"
+    "return f;\n"
   , _matPlastic);
 
   _matmgr.commit_materials(width, height, matHeader);
@@ -122,7 +111,7 @@ void CubeRoom::run(float time) const {
   _matmgrProjIndex.push(proj);
   _matmgrViewIndex.push(view);
   _matmgrLColorIndex.push(0.75f, 0.f, 0.f);
-  _matmgrLPosIndex.push(0.f, 10.f, 0.f);
+  _matmgrLPosIndex.push(0.f, 0.f, 0.f);
   _matmgr.render();
 
   _matmgr.end();
