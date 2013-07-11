@@ -12,10 +12,13 @@ using namespace tech;
 namespace {
   ushort const TEXTURE_WIDTH  = 256;
   ushort const TEXTURE_HEIGHT = 256;
+  ushort const BLUR_PASSES    = 1;
 }
 
 Laser::Laser(ushort width, ushort height, ushort tessLvl, float hheight) :
-    _fbCopier(width, height) {
+    _fbCopier(width, height)
+  , _hblur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
+  , _vblur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height) {
   _init_va();
   _init_program();
   _init_uniforms(tessLvl, hheight);
@@ -135,26 +138,25 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
 
   _sp.unuse();
 
-#if 0
   /* then, blur the lined laser */
   for (int i = 0; i < BLUR_PASSES; ++i) {
     /* first hblur */
-    texh.bind(Texture::T_2D, _laserBlurOfftex[0]);
-    fbh.bind(Framebuffer::DRAW, _laserBlurFB[1]);
+    gTH.bind(Texture::T_2D, _offtexture[0]);
+    gFBH.bind(Framebuffer::DRAW, _pingpong[1]);
     state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-    _laserHBlur.start();
-    _laserHBlur.apply(0.);
-    _laserHBlur.end();
+    _hblur.start();
+    _hblur.apply(0.);
+    _hblur.end();
     /* then vblur */
-    texh.bind(Texture::T_2D, _laserBlurOfftex[1]);
-    fbh.bind(Framebuffer::DRAW, _laserBlurFB[0]);
+    gTH.bind(Texture::T_2D, _offtexture[1]);
+    gFBH.bind(Framebuffer::DRAW, _pingpong[0]);
     state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-    _laserVBlur.start();
-    _laserVBlur.apply(0.);
-    _laserVBlur.end();
+    _vblur.start();
+    _vblur.apply(0.);
+    _vblur.end();
   }
-  fbh.unbind();
-  texh.unbind();
+  gTH.unbind();
+  gFBH.unbind();
 
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is 0 */
@@ -165,9 +167,6 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
   _laserMove.apply(time);
   _laserMove.end();
   fbh.unbind();
-#endif
-
-  /* then render the extremity with billboards */
 #endif
 
   /* combine the blurred lined moving laser and billboards */

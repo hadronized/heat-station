@@ -21,7 +21,6 @@ namespace {
   float  const ZFAR             = 100.f;
   ushort const LASER_TESS_LEVEL = 13;
   float  const LASER_HHEIGHT    = 0.15f;
-  ushort const BLUR_PASSES      = 3;
   float  const SLAB_SIZE        = 1.f;
   float  const SLAB_THICKNESS   = 0.5f;
   uint   const SLAB_INSTANCES   = 600;
@@ -67,17 +66,20 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "vec3 no = normalize(texture(normalmap, get_uv()).xyz);\n"
     "vec3 co = get_co();\n"
     "vec4 matColor;// = texture(propmap, get_uv());\n"
-    "matColor = vec4(1.);\n"
+    "matColor = vec4(.4);\n"
     "vec3 ldir = vec3((lightPos - co).xy, 0.);\n"
     "vec3 nldir = normalize(ldir);\n"
     "vec3 eyedir = normalize(get_eye() - co);\n"
+    "vec3 h = ldir + eyedir;\n"
+    "vec3 nh = normalize(h);\n"
     "float diffk = max(0., dot(nldir, no));\n"
-    "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n"
+    "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n" /* phong */
+    "float bspeck = pow(dot(nh,no), 10.);\n" /* blinn-phong */
     
     "vec4 mixedColor = matColor + vec4(lightColor, 1.);\n"
     "vec4 f = mixedColor * diffk;\n"
-    "f += mixedColor * speck;\n"
-    "f /= pow(length(ldir)*0.5, 4.);\n"
+    "f += mixedColor * bspeck;\n"
+    "f /= pow(length(ldir)*0.5, 2.);\n"
     "return f;\n"
   , _matPlastic);
 

@@ -20,10 +20,8 @@ class Laser {
   sky::core::Framebuffer _pingpong[2];
   sky::core::Renderbuffer _rb;
   sky::tech::DefaultFramebufferCopy _fbCopier; /* TODO: to move away from here */
-#if 0
   sky::tech::PostProcess _hblur;
   sky::tech::PostProcess _vblur;
-#endif
 
   void _init_va(void);
   void _init_program(void);
