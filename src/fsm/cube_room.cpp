@@ -73,7 +73,6 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
     "vec3 h = ldir + eyedir;\n"
     "vec3 nh = normalize(h);\n"
     "float diffk = max(0., dot(nldir, no));\n"
-    "float speck = max(0., dot(reflect(-nldir, no), eyedir));\n" /* phong */
     "float bspeck = pow(dot(nh,no), 10.);\n" /* blinn-phong */
     
     "vec4 mixedColor = matColor + vec4(lightColor, 1.);\n"
