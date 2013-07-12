@@ -11,6 +11,7 @@ COMPRESS_LVL  = 6
 OBJ           = \
 								main.o\
 								\
+								fsm.cave.o\
 								fsm.cube_room.o\
 								fsm.init.o\
 								fsm.slab.o\
