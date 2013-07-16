@@ -10,10 +10,11 @@ using namespace misc;
 using namespace tech;
 
 namespace {
-  float const CAVE_W  = 512.f;
-  float const CAVE_H  = 512.f;
-  float const CAVE_TW = 1024.f;
-  float const CAVE_TH = 1024.f;
+  float const CAVE_W    = 512.f;
+  float const CAVE_H    = 512.f;
+  float const CAVE_TW   = 1024.f;
+  float const CAVE_TH   = 1024.f;
+  float const CAVE_TRES = CAVE_TW * CAVE_TH;
 }
 
 Cave::Cave() :
@@ -32,7 +33,7 @@ void Cave::_init_textures(uint width, uint height) {
         "vec2 uv = gl_FragCoord.xy * res.zw;\n"
         "float f = 2.;\n"
         "float pers = 0.75;\n"
-        "for (short i = 0; i < 4; ++i, f = pow(f, 2.)) {\n"
+        "for (int i = 0; i < 4; ++i, f = pow(f, 2.)) {\n"
           "frag += perlin_noise(uv*f+rand2(uv)) * pow(2., pers);\n"
         "}\n"
       "}\n"
@@ -59,5 +60,13 @@ void Cave::_init_program(uint width, uint height) {
 }
 
 void Cave::_init_uniforms(uint width, uint height) {
+}
+
+void Cave::render(float time, Mat44 const &proj, Mat44 const &view, uint n) const {
+  _sp.use();
+  gTH.unit(0);
+  gTH.bind(Texture::T_2D, *_pTexture[0]);
+  _plane.va.render(primitive::TRIANGLE, 0, CAVE_TRES*6);
+  _sp.unuse();
 }
 

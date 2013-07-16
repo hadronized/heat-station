@@ -1,5 +1,6 @@
 #include <core/state.hpp>
 #include <core/viewport.hpp>
+#include <fsm/common.hpp>
 #include <fsm/cube_room.hpp>
 #include <math/common.hpp>
 #include <math/matrix.hpp>
@@ -16,9 +17,6 @@ using namespace scene;
 using namespace tech;
 
 namespace {
-  float  const FOVY             = PI*70.f/180.f; /* 90 degrees */
-  float  const ZNEAR            = 0.0001f;
-  float  const ZFAR             = 100.f;
   ushort const LASER_TESS_LEVEL = 13;
   float  const LASER_HHEIGHT    = 0.15f;
   float  const SLAB_SIZE        = 1.f;
