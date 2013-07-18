@@ -18,10 +18,10 @@ Intro::Intro(ushort width, ushort height, bool full, char const *title) :
   _init_materials(width, height);
 
   /* init parts FSM here */
-  auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
+  //auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
   auto stairway = new Stairway(width, height, _com, _freefly);
-  _pFSM = new PartsFSM(cubeRoom);
-  //_pFSM = new PartsFSM(stairway);
+  //_pFSM = new PartsFSM(cubeRoom);
+  _pFSM = new PartsFSM(stairway);
 }
 
 Intro::~Intro() {
@@ -67,6 +67,9 @@ void Intro::_init_materials(ushort width, ushort height) {
     "f /= pow(length(ldir)*0.5, 2.);\n"
     "return f;\n"
   , matPlastic);
+  _com.matmgr.register_material(
+    "return texture(normalmap, get_uv());\n"
+  );
 
   _com.matmgr.commit_materials(width, height, matHeader);
 }
@@ -74,15 +77,16 @@ void Intro::_init_materials(ushort width, ushort height) {
 void Intro::run() {
   bool loop = true;
   bool leftClick = false;
+  SDL_Event event;
 
   _synth.play("CentralStation.xm");
 
+  SDL_EnableKeyRepeat(10, 10);
   for (auto time = 0.f; time <= _synth.length() && loop; time = _synth.cursor()) {
     _pFSM->exec(time);
     _cntxt.swap_buffers();
 
 #ifdef SKY_DEBUG /* freefly management */
-    SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
       switch (event.type) {

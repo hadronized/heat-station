@@ -7,5 +7,5 @@ layout (location = 1) out ivec2 matfrag;
 
 void main() {
   nofrag = vno;
-  matfrag = ivec2(1, 2);
+  matfrag = ivec2(1u, 2u);
 }

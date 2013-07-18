@@ -8,24 +8,24 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform float t;
 
-const float h = 0.0001;
-const float c = 0.001;
+const float h = 1./6.;
 
-vec3 deriv_no(vec2 xz) {
-  float wxz = texture(heightmap, xz);
-  float dx = texture(heightmap, vec2(xz.x+h, xz.y)) - wxz;
-  float dz = texture(heightmap, vec2(xz.x, xz.y+h)) - wxz;
+vec3 deriv_no(vec2 xz, float first) {
+  float wxz = first;
+  float dx = texture(heightmap, vec2(xz.x+h, xz.y)).r - wxz;
+  float dz = texture(heightmap, vec2(xz.x, xz.y+h)).r - wxz;
 
   return normalize(vec3(-dx, h, -dz));
 }
 
 void main() {
   /* compute space coordinates */
-  vec3 pos = co;
-  co.y = texture(heightmap, co.xz*c).r;
+  vec3 pos = co.xxy;
+  vec2 lookup = (co.xy/6.+1.)*0.5;
+  pos.y = texture(heightmap, lookup).r;
   /* compute normal */
-  vno = deriv_no(co.xz*c);
+  vno = deriv_no(lookup, pos.y);
 
-  gl_Position = proj * view * vec4(co, 1.);
+  gl_Position = proj * view * vec4(pos, 1.);
 }
 
