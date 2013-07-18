@@ -1,6 +1,7 @@
 #ifndef __FSM_CUBE_ROOM_HPP
 #define __FSM_CUBE_ROOM_HPP
 
+#include <fsm/common.hpp>
 #include <fsm/laser.hpp>
 #include <fsm/liquid.hpp>
 #include <fsm/slab.hpp>
@@ -23,9 +24,8 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
   sky::scene::Freefly const &_freefly;
-  sky::core::Texture _depthmap, _normalmap, _materialmap;
-  sky::tech::DeferredRenderer _drenderer;
-  sky::scene::MaterialManager _matmgr;
+  sky::tech::DeferredRenderer &_drenderer;
+  sky::scene::MaterialManager &_matmgr;
   sky::core::Program::Uniform _matmgrProjIndex;
   sky::core::Program::Uniform _matmgrViewIndex;
   sky::core::Program::Uniform _matmgrLColorIndex;
@@ -39,7 +39,7 @@ class CubeRoom : public sky::sync::FinalPartState {
   void _init_materials(ushort width, ushort height);
 
 public :
-  CubeRoom(sky::ushort width, sky::ushort height, sky::scene::Freefly const &freefly);
+  CubeRoom(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);
   ~CubeRoom(void) = default;
 
   void run(float time) const override;

@@ -11,7 +11,7 @@ float  const ZFAR             = 100.f;
 
 struct Common {
   sky::tech::DeferredRenderer drenderer;
-  sky::scene::MaterialManager matmngr;
+  sky::scene::MaterialManager matmgr;
 
   Common(sky::ushort width, sky::ushort height);
   ~Common(void) = default;

@@ -1,6 +1,6 @@
 CXX           = clang++
 PLATFORM      = -DSKY_LINUX -DSKY_SDL_CONTEXT -DSKY_FMODEX_SYNTH
-CXXFLAGS      = -g -W -Wall -Wextra -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DGL_GLEXT_PROTOTYPES -DSKY_DEBUG $(PLATFORM)
+CXXFLAGS      = -g -W -Wall -Wextra -pedantic -std=c++11 -ffast-math -ffunction-sections -fgcse -I../include -I../skyoralis/include -DSKY_DEBUG $(PLATFORM)
 LDFLAGS       = -L../skyoralis/build/lib -L../skyoralis/lib -lskyoralis -lGL -lSDL -lfmodex
 EXEC_DIR_PATH = ./bin
 RELEASE       = evoke2013_64k
@@ -9,9 +9,11 @@ XM            = CentralStation.xm
 PACKER        = $(RELEASE)
 COMPRESS_LVL  = 6
 OBJ           = \
+								intro.o\
 								main.o\
 								\
 								fsm.cave.o\
+								fsm.common.o\
 								fsm.cube_room.o\
 								fsm.init.o\
 								fsm.laser.o\

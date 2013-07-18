@@ -29,13 +29,14 @@ namespace {
   ushort const LIQUID_RES       = LIQUID_TWIDTH * LIQUID_THEIGHT;
 }
 
-CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
+CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &freefly) :
     /* common */
     _width(width)
   , _height(height)
   , _fbCopier(width, height)
   , _freefly(freefly)
-  , _drenderer(width, height, _depthmap, _normalmap, _materialmap)
+  , _drenderer(common.drenderer)
+  , _matmgr(common.matmgr)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
@@ -43,45 +44,6 @@ CubeRoom::CubeRoom(ushort width, ushort height, Freefly const &freefly) :
 }
 
 void CubeRoom::_init_materials(ushort width, ushort height) {
-  char const *matHeader =
-    "uniform mat4 proj;\n"
-    "uniform mat4 view;\n"
-    "uniform vec3 lightColor;\n"
-    "uniform vec3 lightPos;\n"
-    
-    "vec2 get_uv() {\n"
-      "return gl_FragCoord.xy*res.zw;\n"
-    "}\n"
-    "vec3 get_co() {\n"
-      "vec2 uv = get_uv();\n"
-      "vec4 p = inverse(proj * view) * vec4(2. * vec3(uv, texture(depthmap, uv).r) - 1., 1.);\n"
-      "return p.xyz/p.w;\n"
-    "}\n"
-    "vec3 get_eye() {\n"
-      "return inverse(proj)[3].xyz;\n"
-    "}\n";
-  _matmgr.register_material(
-    "vec3 no = normalize(texture(normalmap, get_uv()).xyz);\n"
-    "vec3 co = get_co();\n"
-    "vec4 matColor;// = texture(propmap, get_uv());\n"
-    "matColor = vec4(.4);\n"
-    "vec3 ldir = vec3((lightPos - co).xy, 0.);\n"
-    "vec3 nldir = normalize(ldir);\n"
-    "vec3 eyedir = normalize(get_eye() - co);\n"
-    "vec3 h = ldir + eyedir;\n"
-    "vec3 nh = normalize(h);\n"
-    "float diffk = max(0., dot(nldir, no));\n"
-    "float bspeck = pow(dot(nh,no), 10.);\n" /* blinn-phong */
-    
-    "vec4 mixedColor = matColor + vec4(lightColor, 1.);\n"
-    "vec4 f = mixedColor * diffk;\n"
-    "f += mixedColor * bspeck;\n"
-    "f /= pow(length(ldir)*0.5, 2.);\n"
-    "return f;\n"
-  , _matPlastic);
-
-  _matmgr.commit_materials(width, height, matHeader);
-  
   _matmgrProjIndex   = _matmgr.postprocess().program().map_uniform("proj");
   _matmgrViewIndex   = _matmgr.postprocess().program().map_uniform("view");
   _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
