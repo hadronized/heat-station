@@ -68,7 +68,7 @@ void Intro::_init_materials(ushort width, ushort height) {
     "return f;\n"
   , matPlastic);
   _com.matmgr.register_material( /* terrain material */
-    "return texture(normalmap, get_uv());\n"
+    //"return texture(normalmap, get_uv());\n"
     "vec3 ldir = -vec3(-1., -1., 0.5);\n"
     "vec4 terrainColor = vec4(0.6);\n"
     "vec3 no = texture(normalmap, get_uv()).xyz;\n"

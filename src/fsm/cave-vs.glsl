@@ -10,8 +10,8 @@ uniform mat4 view;
 uniform vec4 pres;
 uniform float t;
 
-vec2 h = vec2(1. / 256.);
-float maxAmp = sin(t*0.1); /* max amplitude */
+vec2 h = vec2(1. / 512.);
+float maxAmp = sin(t*0.1)*3.; /* max amplitude */
 
 float height(vec2 uv) {
   return texture(heightmap, uv).r * maxAmp;

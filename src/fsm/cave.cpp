@@ -33,10 +33,10 @@ void Cave::_init_textures(uint width, uint height) {
       "void main() {\n"
         "vec2 uv = gl_FragCoord.xy * res.zw;\n"
         "float f = 2.;\n"
-        "float pers = 0.75;\n"
+        "float pers = 0.6;\n"
         "frag = vec4(0., 0., 0., 0.);\n"
-        "for (int i = 0; i < 4; i++) {\n"
-          "frag += perlin_noise(uv*pow(2., float(i+2))) * pow(pers, float(i+0));\n"
+        "for (int i = 0; i < 3; i++) {\n"
+          "frag += perlin_noise(uv*pow(2., float(i+2))) * pow(pers, float(i));\n"
         "}\n"
       "}\n"
     );

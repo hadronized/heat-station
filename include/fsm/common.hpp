@@ -7,7 +7,7 @@
 
 float  const FOVY             = sky::math::PI*70.f/180.f; /* 90 degrees */
 float  const ZNEAR            = 0.0001f;
-float  const ZFAR             = 100.f;
+float  const ZFAR             = 10.f;
 
 struct Common {
   sky::tech::DeferredRenderer drenderer;
