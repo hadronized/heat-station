@@ -67,8 +67,12 @@ void Intro::_init_materials(ushort width, ushort height) {
     "f /= pow(length(ldir)*0.5, 2.);\n"
     "return f;\n"
   , matPlastic);
-  _com.matmgr.register_material(
+  _com.matmgr.register_material( /* terrain material */
     "return texture(normalmap, get_uv());\n"
+    "vec3 ldir = -vec3(-1., -1., 0.5);\n"
+    "vec4 terrainColor = vec4(0.6);\n"
+    "vec3 no = texture(normalmap, get_uv()).xyz;\n"
+    "return terrainColor * max(0., dot(no, ldir));\n"
   );
 
   _com.matmgr.commit_materials(width, height, matHeader);

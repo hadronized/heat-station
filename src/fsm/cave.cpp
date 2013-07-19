@@ -10,10 +10,10 @@ using namespace misc;
 using namespace tech;
 
 namespace {
-  float const CAVE_W    = 20.f;
-  float const CAVE_H    = 20.f;
-  float const CAVE_TW   = 1024.f;
-  float const CAVE_TH   = 1024.f;
+  float const CAVE_W    = 10.f;
+  float const CAVE_H    = 10.f;
+  float const CAVE_TW   = 128.f;
+  float const CAVE_TH   = 128.f;
   float const CAVE_TRES = CAVE_TW * CAVE_TH;
 }
 
@@ -63,12 +63,16 @@ void Cave::_init_program() {
 
 void Cave::_init_uniforms() {
   auto heightmapIndex = _sp.map_uniform("heightmap");
+  auto heightmap2Index = _sp.map_uniform("heightmap2");
+  auto presIndex      = _sp.map_uniform("pres");
   _projIndex          = _sp.map_uniform("proj");
   _viewIndex          = _sp.map_uniform("view");
   _timeIndex          = _sp.map_uniform("t");
 
   _sp.use();
   heightmapIndex.push(0);
+  heightmap2Index.push(1);
+  presIndex.push(CAVE_W, CAVE_H, 1.f / CAVE_W, 1.f / CAVE_H);
   _sp.unuse();
 }
 
@@ -81,6 +85,8 @@ void Cave::render(float time, Mat44 const &proj, Mat44 const &view) const {
 
   gTH.unit(0);
   gTH.bind(Texture::T_2D, *_pTexture[0]);
+  gTH.unit(1);
+  gTH.bind(Texture::T_2D, *_pTexture[1]);
   _plane.va.indexed_render(primitive::TRIANGLE, CAVE_TRES*6, GLT_UINT);
   _sp.unuse();
 }
