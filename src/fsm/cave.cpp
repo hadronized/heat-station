@@ -12,8 +12,8 @@ using namespace tech;
 namespace {
   float const CAVE_W    = 10.f;
   float const CAVE_H    = 10.f;
-  float const CAVE_TW   = 128.f;
-  float const CAVE_TH   = 128.f;
+  float const CAVE_TW   = 512.f;
+  float const CAVE_TH   = 512.f;
   float const CAVE_TRES = CAVE_TW * CAVE_TH;
 }
 
