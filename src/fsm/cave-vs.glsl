@@ -11,10 +11,14 @@ uniform vec4 pres;
 uniform float t;
 
 vec2 h = vec2(1. / 512.);
-float maxAmp = sin(t*0.1)*3.; /* max amplitude */
+float maxAmp = 4.*sin(t*0.1); /* max amplitude */
 
 float height(vec2 uv) {
   return texture(heightmap, uv).r * maxAmp;
+}
+
+float height2(vec2 uv) {
+  return texture(heightmap2, uv).r * maxAmp;
 }
 
 vec3 deriv_no(vec2 xz, float first) {
@@ -25,14 +29,23 @@ vec3 deriv_no(vec2 xz, float first) {
   return normalize(vec3(-dx, h.y, -dz));
 }
 
+vec3 deriv_no2(vec2 xz, float first) {
+  float wxz = first;
+  float dx = height2(vec2(xz.x+h.x, xz.y)) - wxz;
+  float dz = height2(vec2(xz.x, xz.y+h.y)) - wxz;
+
+  return normalize(vec3(-dx, h.y, -dz));
+}
+
 void main() {
   /* compute space coordinates */
   vec3 pos = co.xxy;
   vec2 lookup = (co.xy+pres.xy*0.5)*pres.zw;
+  lookup = co.xy*0.1;
 
-  pos.y = height(lookup);
-  vno = deriv_no(lookup, pos.y);
-  //vno = vec3(lookup, 0.);
+  pos.y = (gl_InstanceID == 0 ? height(lookup) : height2(lookup));
+  vno = (gl_InstanceID == 0 ? deriv_no(lookup, pos.y) : -deriv_no2(lookup, pos.y));
+  pos.y += 4. * (gl_InstanceID == 0 ? 1 : -1);
 
   gl_Position = proj * view * vec4(pos, 1.);
 }

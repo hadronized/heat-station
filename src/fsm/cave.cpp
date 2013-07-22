@@ -10,10 +10,10 @@ using namespace misc;
 using namespace tech;
 
 namespace {
-  float const CAVE_W    = 10.f;
-  float const CAVE_H    = 10.f;
-  float const CAVE_TW   = 512.f;
-  float const CAVE_TH   = 512.f;
+  float const CAVE_W    = 100.f;
+  float const CAVE_H    = 100.f;
+  float const CAVE_TW   = 600.f;
+  float const CAVE_TH   = 600.f;
   float const CAVE_TRES = CAVE_TW * CAVE_TH;
 }
 
@@ -87,7 +87,7 @@ void Cave::render(float time, Mat44 const &proj, Mat44 const &view) const {
   gTH.bind(Texture::T_2D, *_pTexture[0]);
   gTH.unit(1);
   gTH.bind(Texture::T_2D, *_pTexture[1]);
-  _plane.va.indexed_render(primitive::TRIANGLE, CAVE_TRES*6, GLT_UINT);
+  _plane.va.inst_indexed_render(primitive::TRIANGLE, CAVE_TRES*6, GLT_UINT, 2);
   _sp.unuse();
 }
 
