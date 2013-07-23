@@ -15,6 +15,7 @@ OBJ           = \
 								fsm.cave.o\
 								fsm.common.o\
 								fsm.cube_room.o\
+								fsm.fireflies.o\
 								fsm.init.o\
 								fsm.laser.o\
 								fsm.liquid.o\
