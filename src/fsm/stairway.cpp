@@ -40,9 +40,18 @@ void Stairway::run(float time) const {
   _matmgr.start();
   _matmgrProjIndex.push(proj);
   _matmgrViewIndex.push(view);
-  _matmgrLColorIndex.push(1.f, 1.f, 1.f);
-  _matmgrLPosIndex.push(0.f, 5.f, 0.f);
-  _matmgr.render();
+
+  state::enable(state::BLENDING);
+  Framebuffer::blend_func(blending::ONE, blending::ONE);
+  state::disable(state::DEPTH_TEST);
+  for (int i = 0; i < 20; ++i) {
+    auto j = i - 10;
+    _matmgrLColorIndex.push(1.f * i/20.f, 1.f - sinf(i), 1.f - i/30.f);
+    _matmgrLPosIndex.push(6.f * (j % 5), sinf(j)*0.5f, 5.f * j);
+    _matmgr.render();
+  }
+  state::enable(state::BLENDING);
+  state::disable(state::BLENDING);
   _matmgr.end();
   _drenderer.end_shading();
 }

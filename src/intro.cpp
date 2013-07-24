@@ -69,10 +69,14 @@ void Intro::_init_materials(ushort width, ushort height) {
   , matPlastic);
   _com.matmgr.register_material( /* terrain material */
     //"return texture(normalmap, get_uv());\n"
-    "vec3 ldir = -vec3(-1., -1., 0.5);\n"
     "vec4 terrainColor = vec4(0.6);\n"
     "vec3 no = texture(normalmap, get_uv()).xyz;\n"
-    "return terrainColor * max(0., dot(no, ldir));\n"
+    "vec3 co = get_co();\n"
+    "vec3 ldir = normalize(lightPos - co);\n"
+    "float atten = distance(co, lightPos);\n"
+    "atten = pow(atten*0.3, 3.);\n"
+    "atten = 1. / atten;\n"
+    "return (terrainColor+vec4(lightColor, 1.)) * max(0., dot(no, ldir)) * atten;\n"
   );
 
   _com.matmgr.commit_materials(width, height, matHeader);

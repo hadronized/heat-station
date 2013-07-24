@@ -4,7 +4,12 @@
 #include <scene/common.hpp>
 
 class Fireflies {
-  Position _
+  static int const FIREFLIES_NB = 20;
+
+  sky::scene::Position _[FIREFLIES_NB];
+
+public :
+
 };
 
 #endif /* guard */
