@@ -5,6 +5,7 @@
 #include <core/texture.hpp>
 #include <fsm/cave.hpp>
 #include <fsm/common.hpp>
+#include <fsm/fireflies.hpp>
 #include <scene/freefly.hpp>
 #include <scene/material_manager.hpp>
 #include <sync/parts_fsm.hpp>
@@ -19,7 +20,9 @@ class Stairway : public sky::sync::FinalPartState {
   sky::core::Program::Uniform _matmgrViewIndex;
   sky::core::Program::Uniform _matmgrLColorIndex;
   sky::core::Program::Uniform _matmgrLPosIndex;
+
   Cave _cave;
+  Fireflies _fireflies;
 
   void _init_materials(void);
 public :

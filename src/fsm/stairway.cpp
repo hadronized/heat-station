@@ -54,5 +54,7 @@ void Stairway::run(float time) const {
   state::disable(state::BLENDING);
   _matmgr.end();
   _drenderer.end_shading();
+
+  _fireflies.render(proj, view);
 }
 
