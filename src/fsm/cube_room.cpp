@@ -50,7 +50,7 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
 }
 
-void CubeRoom::run(float time) const {
+void CubeRoom::run(float time) {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   auto const &view = _freefly.view();

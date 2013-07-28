@@ -1,4 +1,8 @@
 #include <intro.hpp>
+#if SKY_DEBUG
+# include <misc/clock.hpp>
+# include <misc/log.hpp>
+#endif
 #include <scene/material.hpp>
 
 /* include fsm parts here */
@@ -7,6 +11,7 @@
 
 using namespace sky;
 using namespace core;
+using namespace misc;
 using namespace scene;
 using namespace sync;
 
@@ -69,12 +74,12 @@ void Intro::_init_materials(ushort width, ushort height) {
   , matPlastic);
   _com.matmgr.register_material( /* terrain material */
     //"return texture(normalmap, get_uv());\n"
-    "vec4 terrainColor = vec4(0.6);\n"
+    "vec4 terrainColor = vec4(0.4);\n"
     "vec3 no = texture(normalmap, get_uv()).xyz;\n"
     "vec3 co = get_co();\n"
     "vec3 ldir = normalize(lightPos - co);\n"
-    "float atten = distance(co, lightPos);\n"
-    "atten = pow(atten*0.3, 3.);\n"
+    "float atten = distance(co, lightPos);\n" /* FIXME: with above line */
+    "atten = pow(atten*0.6, 2.);\n"
     "atten = 1. / atten;\n"
     "return (terrainColor+vec4(lightColor, 1.)) * max(0., dot(no, ldir)) * atten;\n"
   );
@@ -90,8 +95,11 @@ void Intro::run() {
   _synth.play("CentralStation.xm");
 
   SDL_EnableKeyRepeat(10, 10);
+  Clock clock;
   for (auto time = 0.f; time <= _synth.length() && loop; time = _synth.cursor()) {
+    clock.reset();
     _pFSM->exec(time);
+    misc::log << debug << "FPS: " << 1. / clock.elapsed() << std::endl;
     _cntxt.swap_buffers();
 
 #ifdef SKY_DEBUG /* freefly management */

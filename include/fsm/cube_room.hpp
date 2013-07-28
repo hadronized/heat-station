@@ -42,7 +42,7 @@ public :
   CubeRoom(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);
   ~CubeRoom(void) = default;
 
-  void run(float time) const override;
+  void run(float time) override;
 };
 
 #endif /* guard */

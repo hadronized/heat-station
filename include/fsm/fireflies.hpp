@@ -30,6 +30,7 @@ public :
 
   sky::scene::Position const * positions(void) const;
   void render(sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
+  void animate(float time);
 };
 
 #endif /* guard */

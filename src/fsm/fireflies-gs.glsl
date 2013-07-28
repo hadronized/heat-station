@@ -5,6 +5,7 @@ layout (triangle_strip, max_vertices = 6) out;
 
 in vec3 vco[];
 in vec3 vcolor[];
+out vec2 gco;
 flat out vec3 gcolor;
 
 uniform mat4 proj;
@@ -20,7 +21,8 @@ const vec2[4] tile = vec2[](
 );
 
 void emit_vertex(uint i) {
-  gl_Position = proj * view * vec4(vco[0]+vec3(tile[i], 0.), 1.);
+  gl_Position = proj * (view * vec4(vco[0], 1.) + vec4(tile[i], 0., 1.));
+  gco = tile[i] / s;
   gcolor = vcolor[0];
   EmitVertex();
 }

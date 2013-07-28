@@ -78,3 +78,13 @@ void Fireflies::render(Mat44 const &proj, Mat44 const &view) const {
   _sp.unuse();
 }
 
+void Fireflies::animate(float time) {
+  for (int i = 0; i < FIREFLIES_NB; ++i) {
+    _pos[i] += Vec3<float>(sinf(time/2.f)/10.f, 0.f, 0.f);
+  }
+
+  gBH.bind(Buffer::ARRAY, _vbo);
+  gBH.subdata(0, FIREFLIES_NB*sizeof(Position), &_pos);
+  gBH.unbind();
+}
+

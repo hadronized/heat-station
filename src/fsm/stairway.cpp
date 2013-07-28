@@ -24,7 +24,7 @@ void Stairway::_init_materials() {
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
 }
 
-void Stairway::run(float time) const {
+void Stairway::run(float time) {
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   auto const &view = _freefly.view();
 
@@ -44,27 +44,23 @@ void Stairway::run(float time) const {
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);
   state::disable(state::DEPTH_TEST);
-#if 0
-  for (int i = 0; i < 20; ++i) {
-    auto j = i - 10;
-    _matmgrLColorIndex.push(1.f * i/20.f, 1.f - sinf(i), 1.f - i/30.f);
-    _matmgrLPosIndex.push(6.f * (j % 5), sinf(j)*0.5f, 5.f * j);
-    _matmgr.render();
-  }
-#endif
+
   auto lights = _fireflies.positions();
   for (int i = 0; i < _fireflies.FIREFLIES_NB; ++i) {
     auto j = i - 10;
     auto p = lights[i];
     _matmgrLColorIndex.push(1.f * i/20.f, 1.f - sinf(i), 1.f - i/30.f);
     _matmgrLPosIndex.push(p.x, p.y, p.z);
+    state::clear(state::DEPTH_BUFFER);
     _matmgr.render();
   }
-  state::enable(state::BLENDING);
-  state::disable(state::BLENDING);
   _matmgr.end();
   _drenderer.end_shading();
 
   _fireflies.render(proj, view);
+
+  state::disable(state::BLENDING);
+
+  _fireflies.animate(time);
 }
 
