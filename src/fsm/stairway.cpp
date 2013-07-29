@@ -24,6 +24,13 @@ void Stairway::_init_materials() {
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
 }
 
+void Stairway::_init_fog() {
+  _init_fog_uniforms();
+}
+
+void Stairway::_init_fog_uniforms() {
+}
+
 void Stairway::run(float time) {
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   auto const &view = _freefly.view();
@@ -43,7 +50,7 @@ void Stairway::run(float time) {
 
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);
-  state::disable(state::DEPTH_TEST);
+  //state::disable(state::DEPTH_TEST);
 
   auto lights = _fireflies.positions();
   for (int i = 0; i < _fireflies.FIREFLIES_NB; ++i) {

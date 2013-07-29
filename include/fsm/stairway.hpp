@@ -24,7 +24,12 @@ class Stairway : public sky::sync::FinalPartState {
   Cave _cave;
   Fireflies _fireflies;
 
+  sky::core::Program _fogSP;
+
   void _init_materials(void);
+  void _init_fog(void);
+  void _init_fog_uniforms(void);
+
 public :
   Stairway(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);
   ~Stairway(void) = default;
