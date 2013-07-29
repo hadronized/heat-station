@@ -10,6 +10,7 @@
 #include <scene/material_manager.hpp>
 #include <sync/parts_fsm.hpp>
 #include <tech/deferred_renderer.hpp>
+#include <tech/post_process.hpp>
 
 class Stairway : public sky::sync::FinalPartState {
   sky::ushort _width, _height;
@@ -24,10 +25,9 @@ class Stairway : public sky::sync::FinalPartState {
   Cave _cave;
   Fireflies _fireflies;
 
-  sky::core::Program _fogSP;
+  sky::tech::PostProcess _fogEffect;
 
   void _init_materials(void);
-  void _init_fog(void);
   void _init_fog_uniforms(void);
 
 public :
