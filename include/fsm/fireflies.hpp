@@ -9,7 +9,7 @@
 
 class Fireflies {
 public :
-  static int const FIREFLIES_NB = 20;
+  static int const FIREFLIES_NB = 10;
 
 private :
   sky::scene::Position _pos[FIREFLIES_NB];
