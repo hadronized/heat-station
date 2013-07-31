@@ -23,10 +23,10 @@ Intro::Intro(ushort width, ushort height, bool full, char const *title) :
   _init_materials(width, height);
 
   /* init parts FSM here */
-  //auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
-  auto stairway = new Stairway(width, height, _com, _freefly);
-  //_pFSM = new PartsFSM(cubeRoom);
-  _pFSM = new PartsFSM(stairway);
+  auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
+  //auto stairway = new Stairway(width, height, _com, _freefly);
+  _pFSM = new PartsFSM(cubeRoom);
+  //_pFSM = new PartsFSM(stairway);
 }
 
 Intro::~Intro() {

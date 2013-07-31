@@ -54,6 +54,7 @@ void CubeRoom::run(float time) {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   auto const &view = _freefly.view();
+  //auto view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
 
   /* viewport */
   //viewport(0, _height / 2, _width / 2, _height / 2);

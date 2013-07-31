@@ -20,6 +20,7 @@ layout (triangle_strip, max_vertices=16) out;
 in vec3 vCo[]; /* vertex shader coordinates */
 
 out vec2 gUV; /* geometry shader texture UV */
+out float gHeight;
 
 uniform float hheight; /* half height of each plane */
 uniform mat4 proj;
@@ -27,6 +28,7 @@ uniform mat4 view;
 
 void emit(vec3 a) {
   gl_Position = proj * view * vec4(a, 1.);
+  gHeight = a.y;
   EmitVertex();
 }
 
