@@ -53,11 +53,22 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
 void CubeRoom::run(float time) {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto const &view = _freefly.view();
-  //auto view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
-
-  /* viewport */
-  //viewport(0, _height / 2, _width / 2, _height / 2);
+  static auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  static auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
+  //auto const &view = _freefly.view();
+  Mat44 view;
+  
+  if (time < 5.f) {
+    view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
+    viewport(0., _height * 0.5f, _width * 0.5f, _height * 0.5f);
+  } else if (time < 10.f) {
+    view = Mat44::trslt(-Position(0.f, 1.f, 0.f)) * pitch;
+    viewport(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
+  } else if (time < 15.f) {
+    view = Mat44::trslt(-Position(1.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix();// * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
+    viewport(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
+  }
+  view = _freefly.view();
 
   _drenderer.start_geometry();
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
