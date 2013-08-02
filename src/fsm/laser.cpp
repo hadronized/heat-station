@@ -74,7 +74,7 @@ void Laser::_init_texture(ushort width, ushort height) {
 
   /* laser texture */
   gRBH.bind(Renderbuffer::RENDERBUFFER, rb);
-  gRBH.store(TEXTURE_WIDTH, TEXTURE_HEIGHT, Texture::IF_DEPTH_COMPONENT);
+  gRBH.store(TEXTURE_WIDTH, TEXTURE_HEIGHT, Texture::IF_DEPTH_COMPONENT32F);
   gRBH.unbind();
 
   gTH.bind(Texture::T_2D, _laserTexture);
@@ -82,7 +82,7 @@ void Laser::_init_texture(ushort width, ushort height) {
   gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_EDGE);
   gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
   gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-  gTH.image_2D(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+  gTH.image_2D(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, Texture::F_RGB, Texture::IF_RGB32F, GLT_FLOAT, 0, nullptr);
   gTH.unbind();
 
   gFBH.bind(Framebuffer::DRAW, fb);
@@ -104,7 +104,7 @@ void Laser::_init_texture(ushort width, ushort height) {
     gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP_TO_BORDER);
     gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_LINEAR);
     gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_LINEAR);
-    gTH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB, GLT_FLOAT, 0, nullptr);
+    gTH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB32F, GLT_FLOAT, 0, nullptr);
     gTH.unbind();
 
     gFBH.bind(Framebuffer::DRAW, _pingpong[i]);
@@ -134,7 +134,7 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
   state::clear(state::COLOR_BUFFER);
   _va.render(primitive::LINE_STRIP, 0, n+1);
   gTH.unbind();
-  gFBH.unbind();
+  gFBH.lazy_unbind();
 
   _sp.unuse();
 
@@ -147,7 +147,7 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
     _hblur.start();
     _hblur.apply(0.);
     _hblur.end();
-    gFBH.unbind();
+    gFBH.lazy_unbind();
     /* then vblur */
     gTH.bind(Texture::T_2D, _offtexture[1]);
     gFBH.bind(Framebuffer::DRAW, _pingpong[0]);
@@ -158,26 +158,9 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
     gFBH.unbind();
   }
 
-  /* add a moving effect on the blurred area
-   * hint: the final blurred framebuffer id is 0 */
-#if 0
-  fbh.bind(Framebuffer::DRAW, _laserBlurFB[1]);
-  texh.bind(Texture::T_2D, _laserBlurOfftex[0]);
-  _laserMove.start();
-  _laserMove.apply(time);
-  _laserMove.end();
-  fbh.unbind();
-#endif
-
   /* combine the blurred lined moving laser and billboards */
   _fbCopier.copy(_offtexture[0]);
   state::disable(state::BLENDING);
   state::enable(state::DEPTH_TEST);
 }
-
-#if 0
-, _laserHBlur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
-  , _laserVBlur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height)
-  , _laserMove("laser move", from_file("../../src/fsm/laser_move-fs.glsl").c_str(), width, height)
-#endif
 

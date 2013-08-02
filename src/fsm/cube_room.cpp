@@ -77,11 +77,11 @@ void CubeRoom::_init_offscreen(ushort width, ushort height) {
 void CubeRoom::run(float time) {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  static auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
-  static auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
-  //auto const &view = _freefly.view();
-  Mat44 view;
+  //static auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  //static auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
+  //Mat44 view;
   
+#if 0
   if (time < 5.f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
     //viewport(0., _height * 0.5f, _width * 0.5f, _height * 0.5f);
@@ -92,6 +92,8 @@ void CubeRoom::run(float time) {
     view = Mat44::trslt(-Position(1.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix();// * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
     //viewport(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
   }
+#endif
+  auto view = _freefly.view();
 
   _drenderer.start_geometry();
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
@@ -99,7 +101,7 @@ void CubeRoom::run(float time) {
   _liquid.render(time, proj, view, LIQUID_RES);
   _drenderer.end_geometry();
 
-  gFBH.bind(Framebuffer::DRAW, _offFB);
+  //gFBH.bind(Framebuffer::DRAW, _offFB);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
 
   _drenderer.start_shading();
@@ -115,9 +117,11 @@ void CubeRoom::run(float time) {
   _drenderer.end_shading();
 
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
-  gFBH.unbind();
+  //gFBH.unbind();
 
+  /*
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _fbCopier.copy(_offTex);
+  */
 }
 

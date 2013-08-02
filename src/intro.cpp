@@ -1,5 +1,5 @@
 #include <intro.hpp>
-#if SKY_DEBUG
+#ifdef SKY_DEBUG
 # include <misc/clock.hpp>
 # include <misc/log.hpp>
 #endif
