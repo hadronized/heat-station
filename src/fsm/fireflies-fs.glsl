@@ -5,6 +5,7 @@ in vec2 gco;
 out vec4 frag;
 
 void main() {
-  frag = vec4(gcolor, 1.) * (1. - length(gco));
+  float d = (1. - sqrt(length(gco)));
+  frag = vec4(gcolor, 1.) * d * 2.5;//vec4(2.4, 2., 3.6, 4.);
 }
 

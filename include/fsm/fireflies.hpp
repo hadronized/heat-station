@@ -9,7 +9,7 @@
 
 class Fireflies {
 public :
-  static int const FIREFLIES_NB = 10;
+  static int const FIREFLIES_NB = 20;
 
 private :
   sky::scene::Position _pos[FIREFLIES_NB];
@@ -29,6 +29,7 @@ public :
   ~Fireflies(void) = default;
 
   sky::scene::Position const * positions(void) const;
+  sky::math::Vec3<float> const * colors(void) const;
   void render(sky::math::Mat44 const &proj, sky::math::Mat44 const &view) const;
   void animate(float time);
 };

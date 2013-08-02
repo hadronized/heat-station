@@ -6,7 +6,7 @@
 #include <tech/deferred_renderer.hpp>
 
 float  const FOVY             = sky::math::PI*70.f/180.f; /* 90 degrees */
-float  const ZNEAR            = 0.0001f;
+float  const ZNEAR            = 0.1f;
 float  const ZFAR             = 10.f;
 
 struct Common {

@@ -32,11 +32,15 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Program::Uniform _matmgrLPosIndex;
   sky::scene::Material _matPlastic;
 
+  sky::core::Texture _offTex;
+  sky::core::Framebuffer _offFB;
+  sky::core::Renderbuffer _offRB;
   Slab _slab;
   Liquid _liquid;
   Laser _laser;
 
-  void _init_materials(ushort width, ushort height);
+  void _init_materials(sky::ushort width, sky::ushort height);
+  void _init_offscreen(sky::ushort width, sky::ushort height);
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);

@@ -51,9 +51,11 @@ void Stairway::run(float time) {
   Framebuffer::blend_func(blending::ONE, blending::ONE);
 
   auto lights = _fireflies.positions();
+  auto colors = _fireflies.colors();
   for (int i = 0; i < _fireflies.FIREFLIES_NB; ++i) {
     auto p = lights[i];
-    _matmgrLColorIndex.push(1.f * i/20.f, 1.f - sinf(i), 1.f - i/30.f);
+    auto l = colors[i];
+    _matmgrLColorIndex.push(l.x, l.y, l.z);
     _matmgrLPosIndex.push(p.x, p.y, p.z);
     state::clear(state::DEPTH_BUFFER);
     _matmgr.render();
@@ -61,7 +63,9 @@ void Stairway::run(float time) {
   _matmgr.end();
   _drenderer.end_shading();
 
+  Framebuffer::blend_func(blending::SRC_ALPHA, blending::ONE_MINUS_SRC_ALPHA);
   _fireflies.render(proj, view);
+  state::disable(state::BLENDING);
 
 #if 0 /* shitty fog */
   state::disable(state::DEPTH_TEST);
@@ -70,8 +74,6 @@ void Stairway::run(float time) {
   _fogEffect.apply(0.f);
   _fogEffect.end();
 #endif
-  state::disable(state::BLENDING);
-  state::enable(state::DEPTH_TEST);
 
   _fireflies.animate(time);
 }

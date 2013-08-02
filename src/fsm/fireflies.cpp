@@ -16,7 +16,7 @@ void Fireflies::_init_fireflies() {
   for (int i = 0; i < FIREFLIES_NB; ++i) {
     int j = i - FIREFLIES_NB / 2.f;
     _pos[i] = Position(sinf(i)*j*10.f, (1. - sinf(i)), cosf(i)*j*10.f);
-    _colors[i] = Vec3<float>(1.f * i/20.f, 1.f - sinf(i), 1.f - i/30.f);
+    _colors[i] = Vec3<float>(0.5f + j/20.f, 1.f - 0.5*(1.+ sinf(j*10.f)), 1.f - (j % 5)/30.f);
   }
 
   /* init buffer */
@@ -63,6 +63,10 @@ void Fireflies::_init_uniforms() {
 
 sky::scene::Position const * Fireflies::positions() const {
   return _pos;
+}
+
+sky::math::Vec3<float> const * Fireflies::colors() const {
+  return _colors;
 }
 
 void Fireflies::render(Mat44 const &proj, Mat44 const &view) const {

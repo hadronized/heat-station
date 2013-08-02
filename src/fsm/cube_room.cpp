@@ -41,6 +41,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &f
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
   _init_materials(width, height);
+  _init_offscreen(width, height);
 }
 
 void CubeRoom::_init_materials(ushort width, ushort height) {
@@ -48,6 +49,29 @@ void CubeRoom::_init_materials(ushort width, ushort height) {
   _matmgrViewIndex   = _matmgr.postprocess().program().map_uniform("view");
   _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
+}
+
+void CubeRoom::_init_offscreen(ushort width, ushort height) {
+  /* offscreen texture */
+  gTH.bind(Texture::T_2D, _offTex);
+  gTH.parameter(Texture::P_WRAP_S, Texture::PV_CLAMP);
+  gTH.parameter(Texture::P_WRAP_T, Texture::PV_CLAMP);
+  gTH.parameter(Texture::P_MIN_FILTER, Texture::PV_NEAREST);
+  gTH.parameter(Texture::P_MAG_FILTER, Texture::PV_NEAREST);
+  gTH.parameter(Texture::P_MAX_LEVEL, 0);
+  gTH.image_2D(width, height, 0, Texture::F_RGB, Texture::IF_RGB32F, GLT_FLOAT, 0, nullptr);
+  gTH.unbind();
+
+  /* offscreen renderbuffer */
+  gRBH.bind(Renderbuffer::RENDERBUFFER, _offRB);
+  gRBH.store(width, height, Texture::IF_DEPTH_COMPONENT32F);
+  gRBH.unbind();
+
+  /* offscreen framebuffer */
+  gFBH.bind(Framebuffer::DRAW, _offFB);
+  gFBH.attach_renderbuffer(_offRB, Framebuffer::DEPTH_ATTACHMENT);
+  gFBH.attach_2D_texture(_offTex, Framebuffer::color_attachment(0));
+  gFBH.unbind();
 }
 
 void CubeRoom::run(float time) {
@@ -60,15 +84,14 @@ void CubeRoom::run(float time) {
   
   if (time < 5.f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
-    viewport(0., _height * 0.5f, _width * 0.5f, _height * 0.5f);
+    //viewport(0., _height * 0.5f, _width * 0.5f, _height * 0.5f);
   } else if (time < 10.f) {
     view = Mat44::trslt(-Position(0.f, 1.f, 0.f)) * pitch;
-    viewport(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
+    //viewport(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
   } else if (time < 15.f) {
     view = Mat44::trslt(-Position(1.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix();// * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
-    viewport(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
+    //viewport(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
   }
-  view = _freefly.view();
 
   _drenderer.start_geometry();
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
@@ -76,6 +99,7 @@ void CubeRoom::run(float time) {
   _liquid.render(time, proj, view, LIQUID_RES);
   _drenderer.end_geometry();
 
+  gFBH.bind(Framebuffer::DRAW, _offFB);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
 
   _drenderer.start_shading();
@@ -91,5 +115,9 @@ void CubeRoom::run(float time) {
   _drenderer.end_shading();
 
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
+  gFBH.unbind();
+
+  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+  _fbCopier.copy(_offTex);
 }
 

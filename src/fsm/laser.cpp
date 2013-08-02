@@ -110,9 +110,9 @@ void Laser::_init_texture(ushort width, ushort height) {
     gFBH.bind(Framebuffer::DRAW, _pingpong[i]);
     gFBH.attach_renderbuffer(_rb, Framebuffer::DEPTH_ATTACHMENT);
     gFBH.attach_2D_texture(_offtexture[i], Framebuffer::COLOR_ATTACHMENT);
+    gFBH.unbind();
   }
 
-  gFBH.unbind();
 }
 
 void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) const {
@@ -147,6 +147,7 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
     _hblur.start();
     _hblur.apply(0.);
     _hblur.end();
+    gFBH.unbind();
     /* then vblur */
     gTH.bind(Texture::T_2D, _offtexture[1]);
     gFBH.bind(Framebuffer::DRAW, _pingpong[0]);
@@ -154,9 +155,8 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
     _vblur.start();
     _vblur.apply(0.);
     _vblur.end();
+    gFBH.unbind();
   }
-  gTH.unbind();
-  gFBH.unbind();
 
   /* add a moving effect on the blurred area
    * hint: the final blurred framebuffer id is 0 */

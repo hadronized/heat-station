@@ -11,7 +11,7 @@ flat out vec3 gcolor;
 uniform mat4 proj;
 uniform mat4 view;
 
-const float s = 0.25;
+const float s = 0.6;
 
 const vec2[4] tile = vec2[](
     vec2(-s,  s)
