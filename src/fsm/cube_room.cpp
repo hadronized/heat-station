@@ -81,6 +81,7 @@ void CubeRoom::run(float time) {
   //static auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
   //Mat44 view;
   
+  misc::log << debug << "time: " << time << std::endl;
 #if 0
   if (time < 5.f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
@@ -96,12 +97,15 @@ void CubeRoom::run(float time) {
   auto view = _freefly.view();
 
   _drenderer.start_geometry();
+  state::enable(state::DEPTH_TEST);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   _slab.render(time, proj, view, SLAB_INSTANCES);
   _liquid.render(time, proj, view, LIQUID_RES);
   _drenderer.end_geometry();
 
-  //gFBH.bind(Framebuffer::DRAW, _offFB);
+  gFBH.bind(Framebuffer::DRAW, _offFB);
+  state::disable(state::DEPTH_TEST);
+  state::enable(state::BLENDING);
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
 
   _drenderer.start_shading();
@@ -116,12 +120,13 @@ void CubeRoom::run(float time) {
   _matmgr.end();
   _drenderer.end_shading();
 
-  _laser.render(time, proj, view, LASER_TESS_LEVEL);
-  //gFBH.unbind();
+  state::clear(state::DEPTH_BUFFER);
 
-  /*
+  _laser.render(time, proj, view, LASER_TESS_LEVEL);
+  gFBH.unbind();
+
   state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+
   _fbCopier.copy(_offTex);
-  */
 }
 

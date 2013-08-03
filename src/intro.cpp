@@ -24,9 +24,11 @@ Intro::Intro(ushort width, ushort height, bool full, char const *title) :
 
   /* init parts FSM here */
   auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
-  //auto stairway = new Stairway(width, height, _com, _freefly);
   _pFSM = new PartsFSM(cubeRoom);
-  //_pFSM = new PartsFSM(stairway);
+  /*
+  auto stairway = new Stairway(width, height, _com, _freefly);
+  _pFSM = new PartsFSM(stairway);
+  */
 }
 
 Intro::~Intro() {
@@ -70,7 +72,7 @@ void Intro::_init_materials(ushort width, ushort height) {
     "vec4 f = mixedColor * diffk;\n"
     "f += mixedColor * bspeck;\n"
     "f /= pow(length(ldir)*0.5, 2.);\n"
-    "return f;\n"
+    "return clamp(f, 0., 1.);\n"
   , matPlastic);
   _com.matmgr.register_material( /* terrain material */
     //"return texture(normalmap, get_uv());\n"

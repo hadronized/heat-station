@@ -134,7 +134,7 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
   state::clear(state::COLOR_BUFFER);
   _va.render(primitive::LINE_STRIP, 0, n+1);
   gTH.unbind();
-  gFBH.lazy_unbind();
+  gFBH.unbind();
 
   _sp.unuse();
 
@@ -161,6 +161,5 @@ void Laser::render(float time, Mat44 const &proj, Mat44 const &view, ushort n) c
   /* combine the blurred lined moving laser and billboards */
   _fbCopier.copy(_offtexture[0]);
   state::disable(state::BLENDING);
-  state::enable(state::DEPTH_TEST);
 }
 
