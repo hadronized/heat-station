@@ -13,6 +13,7 @@ class Slab {
   sky::core::Program _sp;
   sky::core::Program::Uniform _projIndex;
   sky::core::Program::Uniform _viewIndex;
+  sky::core::Program::Uniform _timeIndex;
 
   void _init_ibo(void);
   void _init_va(void);

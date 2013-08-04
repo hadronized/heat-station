@@ -5,6 +5,7 @@ out vec3 vno; /* normal as vertex shader output */
 
 uniform float size;      /* size of the slab */
 uniform float thickness; /* thickness of the slab: 0. = 0., 1. = size */
+uniform float t;
 
 /* slab vertices */
 const float margin = 0.05;

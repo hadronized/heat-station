@@ -104,6 +104,7 @@ void Slab::_init_program() {
 void Slab::_init_uniforms(float size, float thickness) {
   _projIndex          = _sp.map_uniform("proj");
   _viewIndex          = _sp.map_uniform("view");
+  _timeIndex          = _sp.map_uniform("t");
   auto sizeIndex      = _sp.map_uniform("size");
   auto thicknessIndex = _sp.map_uniform("thickness");
 
@@ -120,6 +121,7 @@ void Slab::render(float time, Mat44 const &proj, Mat44 const &view, uint n) cons
 
   _projIndex.push(proj);
   _viewIndex.push(view);
+  _timeIndex.push(time);
 
   gTH.bind(Texture::T_2D, _texture);
   _va.bind();

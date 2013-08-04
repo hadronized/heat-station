@@ -24,11 +24,10 @@ Intro::Intro(ushort width, ushort height, bool full, char const *title) :
 
   /* init parts FSM here */
   auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
-  _pFSM = new PartsFSM(cubeRoom);
-  /*
   auto stairway = new Stairway(width, height, _com, _freefly);
-  _pFSM = new PartsFSM(stairway);
-  */
+  cubeRoom->transition(stairway, 80.f);
+  stairway->transition(nullptr, 100.f);
+  _pFSM = new PartsFSM(cubeRoom);
 }
 
 Intro::~Intro() {
@@ -95,13 +94,15 @@ void Intro::run() {
   SDL_Event event;
 
   _synth.play("CentralStation.xm");
+#ifdef SKY_DEBUG
+  _synth.advance_cursor(75.f*1000.f);
+#endif
 
   SDL_EnableKeyRepeat(10, 10);
   Clock clock;
   for (auto time = 0.f; time <= _synth.length() && loop; time = _synth.cursor()) {
     clock.reset();
     _pFSM->exec(time);
-    misc::log << debug << "FPS: " << 1. / clock.elapsed() << std::endl;
     _cntxt.swap_buffers();
 
 #ifdef SKY_DEBUG /* freefly management */

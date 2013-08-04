@@ -1,8 +1,9 @@
 #include <core/state.hpp>
-#include <scene/common.hpp>
 #include <fsm/common.hpp>
 #include <fsm/stairway.hpp>
 #include <misc/from_file.hpp>
+#include <misc/log.hpp>
+#include <scene/common.hpp>
 
 using namespace sky;
 using namespace core;
@@ -32,7 +33,10 @@ void Stairway::_init_fog_uniforms() {
 
 void Stairway::run(float time) {
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto const &view = _freefly.view();
+  auto view = Mat44::trslt(-Position(0.f, 0.f, time*0.5f));
+
+  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+  //return;
 
   state::enable(state::DEPTH_TEST);
   _drenderer.start_geometry();

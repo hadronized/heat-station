@@ -19,7 +19,7 @@
 #include <tech/post_process.hpp>
 #include <tech/deferred_renderer.hpp>
 
-class CubeRoom : public sky::sync::FinalPartState {
+class CubeRoom : public sky::sync::PartState {
   /* common */
   sky::ushort _width, _height;
   sky::tech::DefaultFramebufferCopy _fbCopier;
@@ -35,6 +35,8 @@ class CubeRoom : public sky::sync::FinalPartState {
   sky::core::Texture _offTex;
   sky::core::Framebuffer _offFB;
   sky::core::Renderbuffer _offRB;
+  sky::tech::TemporalPostProcess _fadePP;
+
   Slab _slab;
   Liquid _liquid;
   Laser _laser;

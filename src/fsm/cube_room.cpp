@@ -37,6 +37,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &f
   , _freefly(freefly)
   , _drenderer(common.drenderer)
   , _matmgr(common.matmgr)
+  , _fadePP("cube room fade", from_file("../../src/fsm/cube_room_fade-fs.glsl").c_str(), width, height)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {
@@ -77,24 +78,31 @@ void CubeRoom::_init_offscreen(ushort width, ushort height) {
 void CubeRoom::run(float time) {
   /* projection & view */
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  //static auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
-  //static auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
-  //Mat44 view;
-  
-  misc::log << debug << "time: " << time << std::endl;
-#if 0
-  if (time < 5.f) {
+  auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
+  auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
+  bool useFade = true;
+  Vec4<float> vp;
+  Mat44 view;
+
+  /* FIXME: WHOOO THAT'S DIRTY!! DO YOU THINK SO?! */
+  if (time <= 5.2f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
-    //viewport(0., _height * 0.5f, _width * 0.5f, _height * 0.5f);
-  } else if (time < 10.f) {
+    vp = Vec4<float>(0.f, _height * 0.5f, _width  * 0.5f, _height * 0.5f);
+  } else if (time <= 10.4f) {
     view = Mat44::trslt(-Position(0.f, 1.f, 0.f)) * pitch;
-    //viewport(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
-  } else if (time < 15.f) {
+    vp = Vec4<float>(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
+  } else if (time <= 15.6f) {
     view = Mat44::trslt(-Position(1.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix();// * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
-    //viewport(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
+    vp = Vec4<float>(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
+  } else if (time <= 20.8f) {
+    view = Mat44::trslt(-Position(0.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix() * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
+  } else {
+    view = Mat44::trslt(-Position(cosf(time), sinf(time), sinf(time))*1.5f) * Orient(Axis3(0.f, 1.f, 0.f), time * PI_2 / 3.).to_matrix() * Orient(Axis3(0.f, 0.f, 1.f), sinf(time)+time*0.5f).to_matrix();
+    vp = Vec4<float>(0.f, 0.f, _width * 0.5f, _height * 0.5f);
+    if (time <= 78.f)
+      useFade = false;
   }
-#endif
-  auto view = _freefly.view();
+  //auto view = _freefly.view();
 
   _drenderer.start_geometry();
   state::enable(state::DEPTH_TEST);
@@ -125,8 +133,16 @@ void CubeRoom::run(float time) {
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
   gFBH.unbind();
 
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-
-  _fbCopier.copy(_offTex);
+  if (useFade) {
+    _fadePP.start();
+    gTH.unit(0);
+    gTH.bind(Texture::T_2D, _offTex);
+    //state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+    _fadePP.apply(time);
+    gTH.unbind();
+    _fadePP.end();
+  } else {
+    _fbCopier.copy(_offTex);
+  }
 }
 

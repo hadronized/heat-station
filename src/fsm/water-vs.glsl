@@ -33,9 +33,8 @@ vec3 deriv_no(vec2 xz, float h) {
 }
 
 void main() {
-
   vec2 lookup = co.xy*0.2;
-  vco = vec3(co.x, water(lookup) - 2., co.y);
+  vco = vec3(co.x, water(lookup) - 3., co.y);
   vno = deriv_no(lookup, h); 
 
   gl_Position = proj * view * vec4(vco, 1.);
