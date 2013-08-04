@@ -35,7 +35,7 @@ void Stairway::run(float time) {
   auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
   auto view = Mat44::trslt(-Position(0.f, 0.f, time*0.5f));
 
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+  //state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
   //return;
 
   state::enable(state::DEPTH_TEST);

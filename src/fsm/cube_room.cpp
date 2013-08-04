@@ -1,5 +1,4 @@
 #include <core/state.hpp>
-#include <core/viewport.hpp>
 #include <fsm/common.hpp>
 #include <fsm/cube_room.hpp>
 #include <math/common.hpp>
@@ -81,28 +80,24 @@ void CubeRoom::run(float time) {
   auto yaw = Orient(Axis3(0.f, 1.f, 0.f), PI_2).to_matrix();
   auto pitch = Orient(Axis3(1.f, 0.f, 0.f), -PI_2).to_matrix();
   bool useFade = true;
-  Vec4<float> vp;
   Mat44 view;
 
+  //misc::log << debug << "CubeRoom::run()" << endl;
+  
   /* FIXME: WHOOO THAT'S DIRTY!! DO YOU THINK SO?! */
   if (time <= 5.2f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
-    vp = Vec4<float>(0.f, _height * 0.5f, _width  * 0.5f, _height * 0.5f);
   } else if (time <= 10.4f) {
     view = Mat44::trslt(-Position(0.f, 1.f, 0.f)) * pitch;
-    vp = Vec4<float>(_width * 0.5f, _height * 0.5f, _width * 0.5f, _height * 0.5f);
   } else if (time <= 15.6f) {
     view = Mat44::trslt(-Position(1.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix();// * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
-    vp = Vec4<float>(_width * 0.5f, 0.f, _width * 0.5f, _height * 0.5f);
   } else if (time <= 20.8f) {
     view = Mat44::trslt(-Position(0.f, 1.f, 1.f)) * Orient(Axis3(0.f, 1.f, 0.f), PI_2 / 3.).to_matrix() * Orient(Axis3(1.f, 0.f, 0.f), -PI_4).to_matrix();
   } else {
     view = Mat44::trslt(-Position(cosf(time), sinf(time), sinf(time))*1.5f) * Orient(Axis3(0.f, 1.f, 0.f), time * PI_2 / 3.).to_matrix() * Orient(Axis3(0.f, 0.f, 1.f), sinf(time)+time*0.5f).to_matrix();
-    vp = Vec4<float>(0.f, 0.f, _width * 0.5f, _height * 0.5f);
-    if (time <= 78.f)
+    if (time <= 75.f)
       useFade = false;
   }
-  //auto view = _freefly.view();
 
   _drenderer.start_geometry();
   state::enable(state::DEPTH_TEST);
@@ -137,8 +132,10 @@ void CubeRoom::run(float time) {
     _fadePP.start();
     gTH.unit(0);
     gTH.bind(Texture::T_2D, _offTex);
-    //state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-    _fadePP.apply(time);
+    if (time <= 75.f)
+      _fadePP.apply(time);
+    else
+      _fadePP.apply(time-75.f);
     gTH.unbind();
     _fadePP.end();
   } else {
