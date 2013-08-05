@@ -32,11 +32,14 @@ void Stairway::_init_fog_uniforms() {
 }
 
 void Stairway::run(float time) {
-  auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
-  auto view = Mat44::trslt(-Position(0.f, 0.f, time*0.5f));
+  if (time <= 81.50f) return;
 
-  //state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-  //return;
+  auto proj = Mat44::perspective(FOVY, 1.f * _width / _height, ZNEAR, ZFAR);
+  auto view = Mat44::trslt(-Position(cosf(time*0.1f)*10.f, sinf(time*0.8f), (81.50f+50.f-time))) * Orient(Axis3(0.f, 0.f, 1.f), PI_2+sinf(time*0.5f)).to_matrix() *
+              Orient(Axis3(0.f, 1.f, 0.f), PI_2*sinf(time*0.5f) / 3.f).to_matrix() *
+              Orient(Axis3(1.f, 0.f, 0.f), PI_4*cosf(time*0.1f)*0.5f).to_matrix();
+
+  gFBH.unbind();
 
   state::enable(state::DEPTH_TEST);
   _drenderer.start_geometry();

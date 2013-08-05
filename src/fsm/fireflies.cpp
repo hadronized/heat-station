@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <ctime>
 #include <fsm/fireflies.hpp>
 #include <misc/from_file.hpp>
 
@@ -10,6 +12,7 @@ using namespace scene;
 Fireflies::Fireflies() {
   _init_fireflies();
   _init_shader();
+  srand(time(nullptr));
 }
 
 void Fireflies::_init_fireflies() {
@@ -83,9 +86,24 @@ void Fireflies::render(Mat44 const &proj, Mat44 const &view) const {
 }
 
 void Fireflies::animate(float time) {
+  static float lastTime = 0.f;
+  float elapsed = time - lastTime;
+  float const UPDATE_TIME = 0.3f; /* update every 100ms */
+  static Vec3<float> offset[FIREFLIES_NB];
+
   for (int i = 0; i < FIREFLIES_NB; ++i) {
-    _pos[i] += Vec3<float>(sinf(time)/10.f, sinf(time*10.)/20.f, 0.f);
+    if (elapsed >= UPDATE_TIME) {
+      float x = (1.f * (rand() % 1000) / 1000.f) - 0.5f;
+      float y = (1.f * (rand() % 1000) / 1000.f) - 0.5f;
+      float z = (1.f * (rand() % 1000) / 1000.f) - 0.5f;
+      offset[i] = Vec3<float>(x, y, z)*0.08f;
+    }
+
+    _pos[i] += offset[i];
   }
+
+  if (elapsed >= UPDATE_TIME)
+    lastTime = time;
 
   gBH.bind(Buffer::ARRAY, _vbo);
   gBH.subdata(0, FIREFLIES_NB*sizeof(Position), &_pos);

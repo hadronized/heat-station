@@ -26,7 +26,7 @@ Intro::Intro(ushort width, ushort height, bool full, char const *title) :
   auto cubeRoom = new CubeRoom(width, height, _com, _freefly);
   auto stairway = new Stairway(width, height, _com, _freefly);
   cubeRoom->transition(stairway, 80.2f);
-  stairway->transition(nullptr, 100.f);
+  stairway->transition(nullptr, 180.f);
   _pFSM = new PartsFSM(cubeRoom);
 }
 
@@ -95,7 +95,7 @@ void Intro::run() {
 
   _synth.play("CentralStation.xm");
 #ifdef SKY_DEBUG
-  _synth.advance_cursor(70.f);
+  _synth.advance_cursor(80.f);
 #endif
 
 
