@@ -17,6 +17,7 @@ Stairway::Stairway(ushort width, ushort height, Common &common, Freefly const &f
   , _freefly(freefly)
   , _drenderer(common.drenderer)
   , _matmgr(common.matmgr)
+  , _stringRenderer(common.stringRenderer)
   , _fogEffect("fog effect", from_file("../../src/fsm/fog-fs.glsl").c_str(), width, height) {
   _init_materials();
 }
@@ -83,5 +84,12 @@ void Stairway::run(float time) {
 #endif
 
   _fireflies.animate(time);
+
+  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
+
+  /* text render */
+  _stringRenderer.start_draw();
+  _stringRenderer.draw_string("hello", -1.f, -0.25f, 1.f);
+  _stringRenderer.end_draw();
 }
 
