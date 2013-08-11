@@ -83,6 +83,7 @@ void Stairway::run(float time) {
   _fogEffect.end();
 #endif
 
+#if 0
   _fireflies.animate(time);
 
   /* text render */
@@ -92,5 +93,6 @@ void Stairway::run(float time) {
   _stringRenderer.draw_string("Gros bebe", -1.f, -0.25f, 0.1f);
   _stringRenderer.end_draw();
   state::disable(state::BLENDING);
+#endif
 }
 
