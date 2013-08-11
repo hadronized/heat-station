@@ -8,5 +8,5 @@ using namespace tech;
 
 Common::Common(ushort width, ushort height) :
     drenderer(width, height)
-  , stringRenderer(GLPH_index, 75, '0') {
+  , stringRenderer(width, height, GLPH_index, 75, '0') {
 }

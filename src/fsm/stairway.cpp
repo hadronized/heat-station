@@ -85,11 +85,12 @@ void Stairway::run(float time) {
 
   _fireflies.animate(time);
 
-  state::clear(state::COLOR_BUFFER | state::DEPTH_BUFFER);
-
   /* text render */
+  state::enable(state::BLENDING);
+  Framebuffer::blend_func(blending::ONE, blending::ONE);
   _stringRenderer.start_draw();
-  _stringRenderer.draw_string("hello", -1.f, -0.25f, 1.f);
+  _stringRenderer.draw_string("Gros bebe", -1.f, -0.25f, 0.1f);
   _stringRenderer.end_draw();
+  state::disable(state::BLENDING);
 }
 

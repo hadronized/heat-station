@@ -19,7 +19,7 @@ void Fireflies::_init_fireflies() {
   for (int i = 0; i < FIREFLIES_NB; ++i) {
     int j = i - FIREFLIES_NB / 2.f;
     _pos[i] = Position(sinf(i)*j*10.f, (1. - sinf(i)), cosf(i)*j*10.f);
-    _colors[i] = Vec3<float>(0.5f + j/20.f, 1.f - 0.5*(1.+ sinf(j*10.f)), 1.f - (j % 5)/30.f);
+    _colors[i] = Vec3<float>(0.5f + j/20.f, 1.f - 0.5*(1.+ tanf(j*10.f)), 1.f - pow(j % 5, 2)/30.f);
   }
 
   /* init buffer */
