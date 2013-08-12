@@ -37,14 +37,20 @@ vec3 deriv_no2(vec2 xz, float first) {
   return normalize(vec3(-dx, h.y, -dz));
 }
 
+float mixer(float a) {
+  return clamp(pow(a, 2.)*pow(-a+0.5, 2.), 0., 1.);
+}
+
 void main() {
   /* compute space coordinates */
   vec3 pos = co.xxy;
   vec2 lookup = (co.xy+pres.xy*0.5)*pres.zw;
   lookup = co.xy*0.1;
 
-  pos.y = (gl_InstanceID == 0 ? height(lookup) : height2(lookup));
-  vno = (gl_InstanceID == 0 ? deriv_no(lookup, pos.y) : -deriv_no2(lookup, pos.y));
+  float mixed = mixer(clamp(t-112., 0., 1.));
+  pos.y = mix(height(lookup), height2(lookup), mixed);
+  vno = mix(deriv_no(lookup, pos.y), deriv_no2(lookup, pos.y), mixed);
+  vno *= (gl_InstanceID == 0 ? 1 : -1);
   pos.y += 4. * (gl_InstanceID == 0 ? 1 : -1);
 
   gl_Position = proj * view * vec4(pos, 1.);

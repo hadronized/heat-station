@@ -75,6 +75,7 @@ void Stairway::run(float time) {
   _fireflies.render(proj, view);
   state::disable(state::BLENDING);
 
+  _fireflies.animate(time);
 #if 0 /* shitty fog */
   state::disable(state::DEPTH_TEST);
   Framebuffer::blend_func(blending::DST_COLOR, blending::ZERO);
@@ -84,7 +85,6 @@ void Stairway::run(float time) {
 #endif
 
 #if 0
-  _fireflies.animate(time);
 
   /* text render */
   state::enable(state::BLENDING);
