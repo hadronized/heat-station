@@ -26,6 +26,20 @@ namespace {
   ushort const LIQUID_TWIDTH    = 80;
   ushort const LIQUID_THEIGHT   = 80;
   ushort const LIQUID_RES       = LIQUID_TWIDTH * LIQUID_THEIGHT;
+  char   const *FADE_FS_SRC     =
+"#version 330 core\n"
+
+"out vec4 frag;"
+
+"uniform vec4 res;"
+"uniform sampler2D srctex;"
+"uniform float t;"
+
+"void main(){"
+  "float fade=clamp(1.-pow(max(0.,mod(t,5.2)-4.),4.),0.,1.);"
+  "frag=texelFetch(srctex,ivec2(gl_FragCoord.xy),0)*fade;"
+  "frag.w=1.;"
+"}";
 }
 
 CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &freefly) :
@@ -36,7 +50,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &f
   , _freefly(freefly)
   , _drenderer(common.drenderer)
   , _matmgr(common.matmgr)
-  , _fadePP("cube room fade", from_file("../../src/fsm/cube_room_fade-fs.glsl").c_str(), width, height)
+  , _fadePP("cube room fade", FADE_FS_SRC, width, height)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
   , _laser(width, height, LASER_TESS_LEVEL, LASER_HHEIGHT) {

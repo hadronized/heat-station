@@ -13,6 +13,28 @@ namespace {
   ushort const TEXTURE_WIDTH  = 256;
   ushort const TEXTURE_HEIGHT = 256;
   ushort const BLUR_PASSES    = 1;
+  char const *LASER_HBLUR =
+"#version 330 core\n"
+
+"uniform sampler2D srctex;"
+"uniform vec4 res;"
+
+"out vec4 frag;"
+
+"void main(){"
+  "vec2 uv=gl_FragCoord.xy*res.zw;"
+  "vec2 st=vec2(res.z*3.,0.);"
+
+  "frag=texture2D(srctex,uv-12.*st)*0.15"
+       "+texture2D(srctex,uv-9.*st)*0.25"
+       "+texture2D(srctex,uv-st)*0.35"
+       "+texture2D(srctex,uv)*0.50"
+       "+texture2D(srctex,uv+st)*0.35"
+       "+texture2D(srctex,uv+9.*st)*0.25"
+       "+texture2D(srctex,uv+12.*st)*0.15"
+       ";"
+"}";
+  //chor const *LASER_VBLUR =
 }
 
 Laser::Laser(ushort width, ushort height, ushort tessLvl, float hheight) :

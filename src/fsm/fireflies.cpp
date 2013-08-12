@@ -9,6 +9,67 @@ using namespace math;
 using namespace misc;
 using namespace scene;
 
+namespace {
+  char const *FIREFLIES_VS_SRC =
+"#version 330 core\n"
+
+"layout(location=0)in vec3 co;"
+"layout(location=1)in vec3 color;"
+
+"out vec3 vco;"
+"out vec3 vcolor;"
+
+"void main(){"
+  "vco=co;"
+  "vcolor=color;"
+"}";
+  char const *FIREFLIES_GS_SRC =
+"#version 330 core\n"
+
+"layout(points)in;"
+"layout(triangle_strip,max_vertices=6)out;"
+
+"in vec3 vco[];"
+"in vec3 vcolor[];"
+"out vec2 gco;"
+"flat out vec3 gcolor;"
+
+"uniform mat4 proj;"
+"uniform mat4 view;"
+
+"const float s=0.6;"
+
+"const vec2[4] tile=vec2[]("
+    "vec2(-s,s)"
+  ",vec2(s,s)"
+  ",vec2(-s-s)"
+  ",vec2(s,-s)"
+");"
+
+"void emit_vertex(uint i){"
+  "gl_Position=proj*(view*vec4(vco[0],1.)+vec4(tile[i],0.,1.));"
+  "gco=tile[i]/s;"
+  "gcolor=vcolor[0];"
+  "EmitVertex();"
+"}"
+
+"void main(){"
+  "for (uint i=0u;i<4u;++i)"
+    "emit_vertex(i);"
+"}";
+  char const *FIREFLIES_FS_SRC =
+"#version 330 core\n"
+
+"flat in vec3 gcolor;"
+"in vec2 gco;"
+"out vec4 frag;"
+
+"void main(){"
+  "float d=(1.-sqrt(length(gco)));"
+  "frag=vec4(gcolor,1.)*d*2.5;" //vec4(2.4, 2., 3.6, 4.);
+"}";
+}
+
 Fireflies::Fireflies() {
   _init_fireflies();
   _init_shader();
@@ -44,11 +105,11 @@ void Fireflies::_init_shader() {
   Shader gs(Shader::GEOMETRY);
   Shader fs(Shader::FRAGMENT);
 
-  vs.source(from_file("../../src/fsm/fireflies-vs.glsl").c_str());
+  vs.source(FIREFLIES_VS_SRC);
   vs.compile("fireflies vertex shader");
-  gs.source(from_file("../../src/fsm/fireflies-gs.glsl").c_str());
+  gs.source(FIREFLIES_GS_SRC);
   gs.compile("fireflies geometry shader");
-  fs.source(from_file("../../src/fsm/fireflies-fs.glsl").c_str());
+  fs.source(FIREFLIES_FS_SRC);
   fs.compile("fireflies fragement shader");
   
   _sp.attach(vs);

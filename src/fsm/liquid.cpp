@@ -7,6 +7,63 @@ using namespace math;
 using namespace misc;
 
 namespace {
+  char const *LIQUID_VS_SRC =
+"#version 330 core\n"
+
+"precision highp float;"
+
+"layout(location=0)in vec3 co;"
+
+"out vec3 vco;"
+"out vec3 vno;"
+
+"uniform mat4 proj;"
+"uniform mat4 view;"
+"uniform float time;"
+
+"const float h=0.00001;"
+"const float a=0.5;"
+
+"float water(vec2 xy){"
+  "float w="
+      "sin(xy.x*8.+time*3.)"
+    "+sin(xy.y*8.)"
+    "+sin(length(xy+vec2(cos(time*0.5),sin(time*0.5))+1.)*10.+time*6.)"
+    "+sin(xy.x*10.+time*6.)*sin(xy.y*6)"
+    ";"
+  "return w/4.*a;"
+"}"
+
+"vec3 deriv_no(vec2 xz,float h){"
+  "float wxz=water(xz);"
+  "float dx=water(vec2(xz.x+h,xz.y))-wxz;"
+  "float dz=water(vec2(xz.x,xz.y+h))-wxz;"
+
+  "return normalize(vec3(-dx,h,-dz));"
+"}"
+
+"void main(){"
+  "vec2 lookup=co.xy*0.2;"
+  "vco=vec3(co.x,water(lookup)-3.,co.y);"
+  "vno=deriv_no(lookup,h);"
+
+  "gl_Position=proj*view*vec4(vco,1.);"
+"}";
+  char const *LIQUID_FS_SRC =
+"#version 330 core\n"
+
+"in vec3 vco;"
+"in vec3 vno;"
+
+"uniform mat4 view;"
+
+"layout(location=0)out vec3 nofrag;"
+"layout(location=1)out uvec2 matfrag;"
+
+"void main() {"
+  "nofrag=vno;"
+  "matfrag=uvec2(1,1);"
+"}";
 }
 
 Liquid::Liquid(uint width, uint height, uint twidth, uint theight) :
@@ -19,9 +76,9 @@ void Liquid::_init_program() {
   Shader vs(Shader::VERTEX);
   Shader fs(Shader::FRAGMENT);
 
-  vs.source(from_file("../../src/fsm/water-vs.glsl").c_str());
+  vs.source(LIQUID_VS_SRC);
   vs.compile("water vertex shader");
-  fs.source(from_file("../../src/fsm/water-fs.glsl").c_str());
+  fs.source(LIQUID_FS_SRC);
   fs.compile("water fragment shader");
 
   _sp.attach(vs);

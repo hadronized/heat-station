@@ -11,6 +11,9 @@ using namespace math;
 using namespace misc;
 using namespace scene;
 
+namespace {
+}
+
 Stairway::Stairway(ushort width, ushort height, Common &common, Freefly const &freefly) :
     _width(width)
   , _height(height)
@@ -18,7 +21,7 @@ Stairway::Stairway(ushort width, ushort height, Common &common, Freefly const &f
   , _drenderer(common.drenderer)
   , _matmgr(common.matmgr)
   , _stringRenderer(common.stringRenderer)
-  , _fogEffect("fog effect", from_file("../../src/fsm/fog-fs.glsl").c_str(), width, height) {
+  /*, _fogEffect("fog effect", from_file("../../src/fsm/fog-fs.glsl").c_str(), width, height)*/ {
   _init_materials();
 }
 
@@ -27,9 +30,6 @@ void Stairway::_init_materials() {
   _matmgrViewIndex   = _matmgr.postprocess().program().map_uniform("view");
   _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
-}
-
-void Stairway::_init_fog_uniforms() {
 }
 
 void Stairway::run(float time) {
@@ -85,7 +85,6 @@ void Stairway::run(float time) {
 #endif
 
 #if 0
-
   /* text render */
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);

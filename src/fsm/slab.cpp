@@ -31,12 +31,112 @@ namespace {
     , 0, 3, 4
     , 3, 4, 7
   };
+  char const *ROOM_VS_SRC =
+"#version 330 core\n"
+
+"out vec3 vco;" /* space coordinates as vertex shader output */
+"out vec3 vno;" /* normal as vertex shader output */
+
+"uniform float size;"      /* size of the slab */
+"uniform float thickness;" /* thickness of the slab: 0. = 0., 1. = size */
+"uniform float t;"
+
+/* slab vertices */
+"const float margin=0.05;"
+"float offset=size+margin;"
+"float size_2=size/2.;"
+"float depth_2=size_2*thickness;"
+"vec3[8] v=vec3[]("
+    "vec3(-size_2,size_2,depth_2)"
+  ", vec3(size_2,size_2,depth_2)"
+  ", vec3(size_2,-size_2,depth_2)"
+  ", vec3(-size_2,-size_2,depth_2)"
+  ", vec3(-size_2,size_2,-depth_2)"
+  ", vec3(size_2,size_2,-depth_2)"
+  ", vec3(size_2,-size_2,-depth_2)"
+  ", vec3(-size_2,-size_2,-depth_2)"
+");"
+
+"void main(){"
+  "float foo=offset*10.;"
+  "float c=(10*size+9*margin)*0.5;"
+  "vco=v[gl_VertexID];"
+
+  "if(gl_InstanceID<100){"
+    "vco+=vec3(mod(gl_InstanceID,10)*offset,floor(gl_InstanceID/10)*offset,0)-c;"
+  "}else if(gl_InstanceID<200){"
+    "vco+=vec3(mod(gl_InstanceID-100,10)*offset,floor((gl_InstanceID-100)/10)*offset,foo)-c;"
+  "}else if(gl_InstanceID<300){"
+    "vco+=vec3(0.,floor((gl_InstanceID-200)/10)*offset,mod(gl_InstanceID-200,10)*offset)-c;"
+  "}else if(gl_InstanceID<400){"
+    "vco+=vec3(foo,floor((gl_InstanceID-300)/10)*offset,mod(gl_InstanceID-300,10)*offset)-c;"
+  "}else if(gl_InstanceID<500){"
+    "vco+=vec3(mod(gl_InstanceID-400,10)*offset,0.,floor((gl_InstanceID-400)/10)*offset)-c;"
+  "}else{"
+    "vco+=vec3(mod(gl_InstanceID-500,10)*offset,foo,floor((gl_InstanceID-500)/10)*offset)-c;"
+  "}"
+"}";
+  char const *ROOM_GS_SRC =
+"#version 330 core\n"
+
+"layout(triangles)in;"
+"layout(triangle_strip,max_vertices=3)out;"
+
+"in vec3 vco[];"
+"in vec3 vno[];"
+
+"out vec3 gco;"
+"out vec3 gno;"
+"out vec2 guv;"
+
+"uniform mat4 proj;"
+"uniform mat4 view;"
+
+"void emit(int i){"
+  "gco=vco[i];"
+  "gl_Position=proj*view*vec4(gco,1.);"
+  "EmitVertex();"
+"}"
+
+"void main(){"
+  /* cube face ID */
+  "int faceID=gl_PrimitiveIDIn/2;"
+
+  /* compute normal and UV coordinates */
+  "if(faceID<2){"
+    "gno=vec3(0.,0.,1.);"
+  "}else if(faceID<4){"
+    "gno=vec3(0.,1.,0.);"
+  "}else{"
+    "gno=vec3(1.,0.,0.);"
+  "}"
+  "if((faceID&1)==1){"
+    "gno=-gno;"
+  "}"
+
+  /* emit the vertices */
+  "for(int i=0;i<3;++i)"
+    "emit(i);"
+"}";
+  char const *ROOM_FS_SRC =
+"#version 330 core\n"
+
+"in vec3 gco;" /* vertex shader space coordinates */
+"in vec3 gno;" /* vertex shader normal */
+
+"layout(location=0)out vec3 nofrag;"
+"layout(location=1)out uvec2 matfrag;"
+
+"void main(){"
+  "nofrag=gno;"
+  "matfrag=uvec2(1,0);"
+"}";
 }
 
 Slab::Slab(uint width, uint height, float size, float thickness) {
   _init_ibo();
   _init_va();
-  _init_texture(width, height);
+  //_init_texture(width, height);
   _init_program();
   _init_uniforms(size, thickness);
 }
@@ -54,6 +154,7 @@ void Slab::_init_va() {
   gBH.unbind();
 }
 
+#if 0
 void Slab::_init_texture(uint width, uint height) {
   Framebuffer fb;
   Renderbuffer rb;
@@ -82,17 +183,18 @@ void Slab::_init_texture(uint width, uint height) {
 
   gFBH.unbind();
 }
+#endif
 
 void Slab::_init_program() {
   Shader vs(Shader::VERTEX);
   Shader gs(Shader::GEOMETRY);
   Shader fs(Shader::FRAGMENT);
 
-  vs.source(from_file("../../src/fsm/room-vs.glsl").c_str());
+  vs.source(ROOM_VS_SRC);
   vs.compile("room vertex shader");
-  gs.source(from_file("../../src/fsm/room-gs.glsl").c_str());
+  gs.source(ROOM_GS_SRC);
   gs.compile("room geometry shader");
-  fs.source(from_file("../../src/fsm/room-fs.glsl").c_str());
+  fs.source(ROOM_FS_SRC);
   fs.compile("room fragment shader");
 
   _sp.attach(vs);
