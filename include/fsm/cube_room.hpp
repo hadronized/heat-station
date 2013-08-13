@@ -26,6 +26,7 @@ class CubeRoom : public sky::sync::PartState {
   sky::scene::Freefly const &_freefly;
   sky::tech::DeferredRenderer &_drenderer;
   sky::scene::MaterialManager &_matmgr;
+  sky::glyph::StringRenderer &_stringRenderer;
   sky::core::Program::Uniform _matmgrProjIndex;
   sky::core::Program::Uniform _matmgrViewIndex;
   sky::core::Program::Uniform _matmgrLColorIndex;
@@ -43,6 +44,7 @@ class CubeRoom : public sky::sync::PartState {
 
   void _init_materials(sky::ushort width, sky::ushort height);
   void _init_offscreen(sky::ushort width, sky::ushort height);
+  void _draw_texts(float t) const;
 
 public :
   CubeRoom(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);

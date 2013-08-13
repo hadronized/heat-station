@@ -49,6 +49,7 @@ CubeRoom::CubeRoom(ushort width, ushort height, Common &common, Freefly const &f
   , _freefly(freefly)
   , _drenderer(common.drenderer)
   , _matmgr(common.matmgr)
+  , _stringRenderer(common.stringRenderer)
   , _fadePP("cube room fade", FADE_FS_SRC, width, height)
   , _slab(width, height, SLAB_SIZE, SLAB_THICKNESS)
   , _liquid(LIQUID_WIDTH, LIQUID_HEIGHT, LIQUID_TWIDTH, LIQUID_THEIGHT)
@@ -85,6 +86,18 @@ void CubeRoom::_init_offscreen(ushort width, ushort height) {
   gFBH.attach_renderbuffer(_offRB, Framebuffer::DEPTH_ATTACHMENT);
   gFBH.attach_2D_texture(_offTex, Framebuffer::color_attachment(0));
   gFBH.unbind();
+}
+
+void CubeRoom::_draw_texts(float t) const {
+//  state::disable(state::DEPTH_TEST);
+  state::enable(state::BLENDING);
+  Framebuffer::blend_func(blending::ONE, blending::ONE);
+
+  _stringRenderer.start_draw();
+  _stringRenderer.draw_string("je te wuver", -1., -0.25, 0.08);
+  _stringRenderer.end_draw();
+  state::disable(state::BLENDING);
+//  state::enable(state::DEPTH_TEST);
 }
 
 void CubeRoom::run(float time) {
@@ -139,7 +152,10 @@ void CubeRoom::run(float time) {
   state::clear(state::DEPTH_BUFFER);
 
   _laser.render(time, proj, view, LASER_TESS_LEVEL);
+
+  _draw_texts(time);
   gFBH.unbind();
+  gFBH.unbind(); /* hihi... :DDDD */
 
   if (useFade) {
     gFBH.unbind();
