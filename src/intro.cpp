@@ -101,7 +101,7 @@ void Intro::run() {
 #ifdef SKY_DEBUG
   _synth.advance_cursor(80.f);
 #endif
-  _synth.advance_cursor(80.f);
+  //_synth.advance_cursor(80.f);
 
 
 #ifdef SKY_DEBUG

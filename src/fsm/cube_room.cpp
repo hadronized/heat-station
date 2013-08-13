@@ -142,6 +142,7 @@ void CubeRoom::run(float time) {
   gFBH.unbind();
 
   if (useFade) {
+    gFBH.unbind();
     _fadePP.start();
     gTH.unit(0);
     gTH.bind(Texture::T_2D, _offTex);
