@@ -1,13 +1,11 @@
 #include <core/framebuffer.hpp>
 #include <core/renderbuffer.hpp>
 #include <fsm/slab.hpp>
-#include <misc/from_file.hpp>
 #include <tech/post_process.hpp>
 
 using namespace sky;
 using namespace core;
 using namespace math;
-using namespace misc;
 using namespace tech;
 
 namespace {

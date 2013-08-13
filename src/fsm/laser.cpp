@@ -1,6 +1,5 @@
 #include <core/renderbuffer.hpp>
 #include <fsm/laser.hpp>
-#include <misc/from_file.hpp>
 #include <misc/log.hpp>
 
 using namespace sky;
@@ -13,7 +12,7 @@ namespace {
   ushort const TEXTURE_WIDTH  = 256;
   ushort const TEXTURE_HEIGHT = 256;
   ushort const BLUR_PASSES    = 1;
-  char const *LASER_HBLUR =
+  char const *LASER_HBLUR_FS_SRC =
 "#version 330 core\n"
 
 "uniform sampler2D srctex;"
@@ -34,13 +33,158 @@ namespace {
        "+texture2D(srctex,uv+12.*st)*0.15"
        ";"
 "}";
-  //chor const *LASER_VBLUR =
+  char const *LASER_VBLUR_FS_SRC =
+"#version 330 core\n"
+
+"uniform sampler2D srctex;"
+"uniform vec4 res;"
+
+"out vec4 frag;"
+
+"void main(){"
+  "vec2 uv=gl_FragCoord.xy*res.zw;"
+  "vec2 st=vec2(0.,res.z*3.);"
+
+  "frag=texture2D(srctex,uv-12.*st)*0.15"
+       "+texture2D(srctex,uv-9.*st)*0.25"
+       "+texture2D(srctex,uv-st)*0.35"
+       "+texture2D(srctex,uv)*0.50"
+       "+texture2D(srctex,uv+st)*0.35"
+       "+texture2D(srctex,uv+9.*st)*0.25"
+       "+texture2D(srctex,uv+12.*st)*0.15"
+       ";"
+"}";
+  char const *LASER_VS_SRC =
+"#version 330 core\n"
+
+"out vec3 vCo;"
+
+"uniform vec2 vnb;" /* vertices nb; 1 / vertices nb */
+"uniform float t;"
+
+"const float PI=3.141592;"
+
+"void main(){"
+  /* laser */
+  "float d=10.;"
+  "float d2=d*0.5;"
+  "vCo=vec3(0.,0.,gl_VertexID*vnb.y*d-d2);"
+
+  /* displacement */
+  "vCo.y+=sin(vCo.z*2.*PI+t*20.)/30.;"
+  "vCo.y+=clamp(tan(vCo.z+t)/300.,-2.,2.);"
+"}";
+  char const *LASER_GS_SRC =
+"#version 330 core\n"
+
+"layout(lines)in;"
+"layout(triangle_strip,max_vertices=16)out;"
+
+"in vec3 vCo[];" /* vertex shader coordinates */
+
+"out vec2 gUV;" /* geometry shader texture UV */
+"out float gHeight;"
+
+"uniform float hheight;" /* half height of each plane */
+"uniform mat4 proj;"
+"uniform mat4 view;"
+
+"void emit(vec3 a){"
+  "gl_Position=proj*view*vec4(a,1.);"
+  "gHeight=a.y;"
+  "EmitVertex();"
+"}"
+
+"void emit_plane(vec3 a,vec3 b,vec3 c,vec3 d){"
+  "gUV=vec2(0.,0.);"
+  "emit(a);"
+
+  "gUV=vec2(1.,0.);"
+  "emit(b);"
+
+  "gUV=vec2(0.,1.);"
+  "emit(c);"
+
+  "gUV=vec2(1.,1.);"
+  "emit(d);"
+
+  "EndPrimitive();"
+"}"
+
+"void main(){"
+  /* hplane */
+  "vec3 a=vec3(vCo[0].x-hheight,vCo[0].yz);"
+  "vec3 b=vec3(vCo[0].x+hheight,vCo[0].yz);"
+  "vec3 c=vec3(vCo[1].x-hheight,vCo[1].yz);"
+  "vec3 d=vec3(vCo[1].x+hheight,vCo[1].yz);"
+  "emit_plane(a,b,c,d);"
+
+  /* vplane */
+  "a=vec3(vCo[0].x,vCo[0].y-hheight,vCo[0].z);"
+  "b=vec3(vCo[0].x,vCo[0].y+hheight,vCo[0].z);"
+  "c=vec3(vCo[1].x,vCo[1].y-hheight,vCo[1].z);"
+  "d=vec3(vCo[1].x,vCo[1].y+hheight,vCo[1].z);"
+  "emit_plane(a,b,c,d);"
+
+  /* lplane */
+  "a=vec3(vCo[0].x-hheight,vCo[0].y+hheight,vCo[0].z);"
+  "b=vec3(vCo[0].x+hheight,vCo[0].y-hheight,vCo[0].z);"
+  "c=vec3(vCo[1].x-hheight,vCo[1].y+hheight,vCo[1].z);"
+  "d=vec3(vCo[1].x+hheight,vCo[1].y-hheight,vCo[1].z);"
+  "emit_plane(a,b,c,d);"
+
+  /* rplane */
+  "a=vec3(vCo[0].x-hheight,vCo[0].y-hheight,vCo[0].z);"
+  "b=vec3(vCo[0].x+hheight,vCo[0].y+hheight,vCo[0].z);"
+  "c=vec3(vCo[1].x-hheight,vCo[1].y-hheight,vCo[1].z);"
+  "d=vec3(vCo[1].x+hheight,vCo[1].y+hheight,vCo[1].z);"
+  "emit_plane(a,b,c,d);"
+"}";
+  char const *LASER_FS_SRC =
+"#version 330 core\n"
+
+"in vec2 gUV;"
+"in float gHeight;"
+
+"out vec4 frag;"
+
+"uniform sampler2D lasertex;"
+
+"void main(){"
+  "frag=texture(lasertex,gUV)+vec4(0.,0.,1.,1.)*gHeight/2.;"
+"}";
+  char const *LASER_TEX_GEN_FS_SRC =
+"#version 330 core\n"
+
+"out vec4 frag;"
+
+"uniform vec4 res;"
+"uniform float t;"
+
+"const float PI=3.14159265359;"
+
+"float laser_tex(vec2 uv,float i){"
+  "return pow(sin(uv.x*PI),i);"
+"}"
+
+"float rand(vec2 a){"
+  "return sin(dot(a.xy,vec2(12.9898,78.233)))*43758.5453;"
+"}"
+
+"void main(){"
+  "vec2 uv=gl_FragCoord.xy*res.zw;"
+  "vec4 laserColor=vec4(0.75,0.,0.,1.);"
+  "vec4 laserCoreColor=vec4(1.);"
+
+  "frag=laserColor*laser_tex(uv,4.);"
+  "frag+=laserCoreColor*laser_tex(uv,24.)*0.42;"
+"}";
 }
 
 Laser::Laser(ushort width, ushort height, ushort tessLvl, float hheight) :
     _fbCopier(width, height)
-  , _hblur("laser hblur", from_file("../../src/fsm/laser_hblur-fs.glsl").c_str(), width, height)
-  , _vblur("laser vblur", from_file("../../src/fsm/laser_vblur-fs.glsl").c_str(), width, height) {
+  , _hblur("laser hblur", LASER_HBLUR_FS_SRC, width, height)
+  , _vblur("laser vblur", LASER_VBLUR_FS_SRC, width, height) {
   _init_va();
   _init_program();
   _init_uniforms(tessLvl, hheight);
@@ -58,11 +202,11 @@ void Laser::_init_program() {
   Shader fs(Shader::FRAGMENT);
 
   /* sources compilation */
-  vs.source(from_file("../../src/fsm/laser-vs.glsl").c_str());
+  vs.source(LASER_VS_SRC);
   vs.compile("laser VS");
-  gs.source(from_file("../../src/fsm/laser-gs.glsl").c_str());
+  gs.source(LASER_GS_SRC);
   gs.compile("laser GS");
-  fs.source(from_file("../../src/fsm/laser-fs.glsl").c_str());
+  fs.source(LASER_FS_SRC);
   fs.compile("laser FS");
 
   /* program link */
@@ -92,7 +236,7 @@ void Laser::_init_uniforms(ushort tessLvl, float hheight) {
 void Laser::_init_texture(ushort width, ushort height) {
   Framebuffer fb; /* FIXME: it may not be needed at all */
   Renderbuffer rb;
-  PostProcess generator("laser texture generator", from_file("../../src/fsm/laser_texgen-fs.glsl").c_str(), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+  PostProcess generator("laser texture generator", LASER_TEX_GEN_FS_SRC, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
   /* laser texture */
   gRBH.bind(Renderbuffer::RENDERBUFFER, rb);

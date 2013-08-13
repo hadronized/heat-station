@@ -1,12 +1,10 @@
 #include <fsm/cave.hpp>
-#include <misc/from_file.hpp>
 #include <tech/perlin_noise_generator.hpp>
 
 using namespace sky;
 using namespace core;
 using namespace data;
 using namespace math;
-using namespace misc;
 using namespace tech;
 
 namespace {

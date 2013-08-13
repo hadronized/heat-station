@@ -5,7 +5,6 @@
 #include <math/matrix.hpp>
 #include <math/quaternion.hpp>
 #include <misc/log.hpp>
-#include <misc/from_file.hpp>
 
 using namespace std;
 using namespace sky;

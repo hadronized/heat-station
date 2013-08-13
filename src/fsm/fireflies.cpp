@@ -1,12 +1,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <fsm/fireflies.hpp>
-#include <misc/from_file.hpp>
 
 using namespace sky;
 using namespace core;
 using namespace math;
-using namespace misc;
 using namespace scene;
 
 namespace {

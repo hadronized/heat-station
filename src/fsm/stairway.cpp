@@ -1,7 +1,6 @@
 #include <core/state.hpp>
 #include <fsm/common.hpp>
 #include <fsm/stairway.hpp>
-#include <misc/from_file.hpp>
 #include <misc/log.hpp>
 #include <scene/common.hpp>
 
