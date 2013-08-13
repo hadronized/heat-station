@@ -8,7 +8,7 @@
 
 class Cave {
   sky::data::SubPlane _plane;
-  sky::core::Texture *_pTexture[5];
+  sky::core::Texture *_pTexture[2];
   sky::core::Program _sp;
   sky::core::Program::Uniform _projIndex;
   sky::core::Program::Uniform _viewIndex;

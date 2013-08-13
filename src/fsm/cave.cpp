@@ -95,7 +95,7 @@ Cave::Cave() :
 }
 
 Cave::~Cave() {
-  for (short i = 0; i < 5; ++i)
+  for (short i = 0; i < 2; ++i)
     delete _pTexture[i];
 }
 
@@ -112,8 +112,8 @@ void Cave::_init_textures(uint width, uint height) {
       "}\n"
     );
 
-  for (short i = 0; i < 5; ++i)
-    _pTexture[i] = png.gen(i);
+  for (short i = 0; i < 2; ++i)
+    _pTexture[i] = png.gen(i+1);
 }
 
 void Cave::_init_program() {
