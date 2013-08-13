@@ -89,15 +89,17 @@ void CubeRoom::_init_offscreen(ushort width, ushort height) {
 }
 
 void CubeRoom::_draw_texts(float t) const {
-//  state::disable(state::DEPTH_TEST);
   state::enable(state::BLENDING);
   Framebuffer::blend_func(blending::ONE, blending::ONE);
-
   _stringRenderer.start_draw();
-  _stringRenderer.draw_string("je te wuver", -1., -0.25, 0.08);
+
+  if (t < 41.f) {
+  } else {
+    _stringRenderer.draw_string("je te wuver", 1.-(t-41.f)*0.5, -0.25, 0.08);
+  }
+
   _stringRenderer.end_draw();
   state::disable(state::BLENDING);
-//  state::enable(state::DEPTH_TEST);
 }
 
 void CubeRoom::run(float time) {

@@ -99,7 +99,7 @@ void Intro::run() {
 
   _synth.play("CentralStation.xm");
 #ifdef SKY_DEBUG
-  _synth.advance_cursor(80.f);
+  _synth.advance_cursor(30.f);
 #endif
   //_synth.advance_cursor(80.f);
 
