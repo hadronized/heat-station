@@ -12,7 +12,7 @@
 #include <tech/deferred_renderer.hpp>
 #include <tech/post_process.hpp>
 
-class Stairway : public sky::sync::PartState {
+class Stairway : public sky::sync::FinalPartState {
   sky::ushort _width, _height;
   sky::scene::Freefly const &_freefly;
   sky::tech::DeferredRenderer &_drenderer;

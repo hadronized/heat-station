@@ -11,7 +11,9 @@
 
 using namespace sky;
 using namespace core;
+#ifdef SKY_DEBUG
 using namespace misc;
+#endif
 using namespace scene;
 using namespace sync;
 
@@ -90,25 +92,31 @@ void Intro::_init_materials(ushort width, ushort height) {
 
 void Intro::run() {
   bool loop = true;
+#ifdef SKY_DEBUG
   bool leftClick = false;
   SDL_Event event;
+#endif
 
   _synth.play("CentralStation.xm");
 #ifdef SKY_DEBUG
   _synth.advance_cursor(80.f);
 #endif
+  _synth.advance_cursor(80.f);
 
 
-  SDL_EnableKeyRepeat(10, 10);
+#ifdef SKY_DEBUG
   Clock clock;
+  SDL_EnableKeyRepeat(10, 10);
+#endif
   for (auto time = 0.f; !_pFSM->over() && time <= _synth.length() && loop; time = _synth.cursor()) {
+#ifdef SKY_DEBUG
     clock.reset();
     misc::log << debug << "time: " << time << std::endl;
+#endif
     _pFSM->exec(time);
     _cntxt.swap_buffers();
 
 #ifdef SKY_DEBUG /* freefly management */
-
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_MOUSEMOTION :

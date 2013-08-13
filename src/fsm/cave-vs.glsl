@@ -38,6 +38,7 @@ vec3 deriv_no2(vec2 xz, float first) {
 }
 
 float mixer(float a) {
+  return a;
   return clamp(pow(a, 2.)*pow(-a+0.5, 2.), 0., 1.);
 }
 
