@@ -21,8 +21,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  SDL_EnableKeyRepeat(10, 10);
-
   Intro intro(width, height, full, TITLE);
   intro.run();
 
