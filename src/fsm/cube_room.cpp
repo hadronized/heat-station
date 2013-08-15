@@ -94,8 +94,13 @@ void CubeRoom::_draw_texts(float t) const {
   _stringRenderer.start_draw();
 
   if (t < 41.f) {
+  } else if (t < 61.5f) {
+    _stringRenderer.draw_string("OHAI EVOKE2013! I AM HAPPY TO PRESENT YOU MY SECOND RELEASE", 1.f-(t-41.f)*0.5f, 0.25f, 0.08f);
+    _stringRenderer.draw_string("HEAT STATION", 1.f-(t-51.f)*0.5f, 0.15f, 0.1f);
   } else {
-    _stringRenderer.draw_string("je te wuver", 1.-(t-41.f)*0.5, -0.25, 0.08);
+    _stringRenderer.draw_string("THIS LITTLE 64K INTRO WAS WRITTEN BY ME SKYPERS", 1.f-(t-61.5f)*0.5f, -0.35f, 0.08f);
+    _stringRenderer.draw_string("AND ITS SOUNDTRACK WAS PROVIDED BY GASPODE", 1.f-(t-65.5f)*0.5f, -0.2f, 0.08f);
+    _stringRenderer.draw_string("THANK YOU GASPODE!", 1.f-(t-70.5f)*0.5f, 0.1f, 0.08f);
   }
 
   _stringRenderer.end_draw();
@@ -112,7 +117,7 @@ void CubeRoom::run(float time) {
 
   //misc::log << debug << "CubeRoom::run()" << endl;
   
-  /* FIXME: WHOOO THAT'S DIRTY!! DO YOU THINK SO?! */
+  /* FIXME: WHOOO THAT'S DIRTY!! DO YOU THINK SO?! */
   if (time <= 5.2f) {
     view = Mat44::trslt(-Position(1.f, 0.f, 0.f)) * yaw;
   } else if (time <= 10.4f) {

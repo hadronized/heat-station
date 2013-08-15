@@ -10,9 +10,6 @@ using namespace math;
 using namespace misc;
 using namespace scene;
 
-namespace {
-}
-
 Stairway::Stairway(ushort width, ushort height, Common &common, Freefly const &freefly) :
     _width(width)
   , _height(height)
@@ -29,6 +26,21 @@ void Stairway::_init_materials() {
   _matmgrViewIndex   = _matmgr.postprocess().program().map_uniform("view");
   _matmgrLColorIndex = _matmgr.postprocess().program().map_uniform("lightColor");
   _matmgrLPosIndex   = _matmgr.postprocess().program().map_uniform("lightPos");
+}
+
+void Stairway::_draw_texts(float t) const {
+  state::enable(state::BLENDING);
+  Framebuffer::blend_func(blending::ONE, blending::ONE);
+  _stringRenderer.start_draw();
+
+  if (t < 100.8f) {
+  } else {
+    _stringRenderer.draw_string("I WOULD ALSO LIKE TO THANK ALL FRIENDS OF MINE", 1.f-(t-100.8f)*0.5f, -0.2f, 0.08f); 
+    _stringRenderer.draw_string("WHO GAVE ME THEIR GREAT SUPPORT", 1.f-(t-105.f)*0.5f, -0.35f, 0.08f);
+    _stringRenderer.draw_string("LUV YOU GUYS!", 1.f-(t-110.f)*0.5f, -0.35f, 0.08f);
+  }
+  _stringRenderer.end_draw();
+  state::disable(state::BLENDING);
 }
 
 void Stairway::run(float time) {
@@ -74,7 +86,7 @@ void Stairway::run(float time) {
   _fireflies.render(proj, view);
   state::disable(state::BLENDING);
 
-  _fireflies.animate(time);
+
 #if 0 /* shitty fog */
   state::disable(state::DEPTH_TEST);
   Framebuffer::blend_func(blending::DST_COLOR, blending::ZERO);
@@ -83,14 +95,8 @@ void Stairway::run(float time) {
   _fogEffect.end();
 #endif
 
-#if 0
-  /* text render */
-  state::enable(state::BLENDING);
-  Framebuffer::blend_func(blending::ONE, blending::ONE);
-  _stringRenderer.start_draw();
-  _stringRenderer.draw_string("Gros bebe", -1.f, -0.25f, 0.1f);
-  _stringRenderer.end_draw();
-  state::disable(state::BLENDING);
-#endif
+  _draw_texts(time);
+
+  _fireflies.animate(time);
 }
 

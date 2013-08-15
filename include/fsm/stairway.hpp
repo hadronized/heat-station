@@ -27,6 +27,7 @@ class Stairway : public sky::sync::FinalPartState {
   Fireflies _fireflies;
 
   void _init_materials(void);
+  void _draw_texts(float t) const;
 
 public :
   Stairway(sky::ushort width, sky::ushort height, Common &common, sky::scene::Freefly const &freefly);
