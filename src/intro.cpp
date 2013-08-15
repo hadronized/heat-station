@@ -99,7 +99,7 @@ void Intro::run() {
 
   _synth.play("CentralStation.xm");
 #ifdef SKY_DEBUG
-  _synth.advance_cursor(80.f);
+  _synth.advance_cursor(150.f);
 #endif
 
 
@@ -107,7 +107,7 @@ void Intro::run() {
   Clock clock;
   SDL_EnableKeyRepeat(10, 10);
 #endif
-  for (auto time = 0.f; !_pFSM->over() && time <= _synth.length() && loop; time = _synth.cursor()) {
+  for (auto time = 0.f; !_pFSM->over() && time <= 163.5f && loop; time = _synth.cursor()) {
 #ifdef SKY_DEBUG
     clock.reset();
     misc::log << debug << "time: " << time << std::endl;

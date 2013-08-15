@@ -34,10 +34,15 @@ void Stairway::_draw_texts(float t) const {
   _stringRenderer.start_draw();
 
   if (t < 100.8f) {
-  } else {
+  } else if (t < 161.3f) {
     _stringRenderer.draw_string("I WOULD ALSO LIKE TO THANK ALL FRIENDS OF MINE", 1.f-(t-100.8f)*0.5f, -0.2f, 0.08f); 
     _stringRenderer.draw_string("WHO GAVE ME THEIR GREAT SUPPORT", 1.f-(t-105.f)*0.5f, -0.35f, 0.08f);
     _stringRenderer.draw_string("LUV YOU GUYS!", 1.f-(t-110.f)*0.5f, -0.35f, 0.08f);
+  } else {
+    state::disable(state::DEPTH_TEST);
+    _stringRenderer.draw_string("YOU IZ AWESOME EVOKE!", -0.7f, 0.3f, 0.08f);
+    _stringRenderer.draw_string("CHEERS!", -0.25f, 0.f, 0.1f);
+    state::enable(state::DEPTH_TEST);
   }
   _stringRenderer.end_draw();
   state::disable(state::BLENDING);
